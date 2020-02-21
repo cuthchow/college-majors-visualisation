@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Merriweather&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Kosugi&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Domine:400,700&display=swap');
 
 body {
+    background-color: rgb(245, 244, 241);
 }
 
 #sections {
@@ -15,9 +18,13 @@ body {
 .step {
     margin-bottom: 100px;
     height: 700px;
-    font-family: "Merriweather";
-    font-weight: 100;
+    font-family: "Domine";
+    font-weight: 400;
     line-height: 1.4rem;
+}
+
+h1 {
+    font-weight: 700;
 }
 
 #graphic {
@@ -36,10 +43,23 @@ body {
     margin-left: 0;
     height: 1000px;
     width: 1000px;
-    background-color: rgb(238, 238, 238);
+
 }
 
 .tick line {
     stroke: 'red'
 }
 
+#tooltip {
+    position: absolute;
+    display: none;
+    background: rgba(0, 0, 0, .7);
+    border-radius: 3px;
+    box-shadow: -3px 3px 15px #939393;
+    color: white;
+    padding: 6px;
+    font-family: "Merriweather";
+    font-size: 1.1em;
+    max-width: 400px;
+    z-index: 100;
+}

@@ -53,13 +53,12 @@ d3.csv('data/recent-grads.csv', function(d){
 
 function createScales(){
     salarySizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [5, 35])
-    salaryXScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [margin.left, margin.left + width])
+    salaryXScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [margin.left, margin.left + width + 200])
     salaryYScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [margin.top + height, margin.top])
     categoryColorScale = d3.scaleOrdinal(categories, d3.schemeSet3)
     shareWomenXScale = d3.scaleLinear(d3.extent(dataset, d => d.ShareWomen), [margin.left, margin.left + width])
     enrollmentScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [margin.left, margin.left + width])
 }
-
 
 
 //Draws the initial stuff
@@ -98,7 +97,7 @@ function drawInitial(){
         .data(dataset)
         .enter()
         .append('circle')
-            .attr('fill', d => categoryColorScale(d.Category))
+            .attr('fill', 'black')
             .attr('r', 3)
             .attr('cx', (d, i) => salaryXScale(d.Median))
             .attr('cy', (d, i) => i * 5.5 + 20)
@@ -107,24 +106,32 @@ function drawInitial(){
     // Add mouseover and mouseout events for all circles
     // Changes opacity and adds border
     svg.selectAll('circle')
-        .on('mouseover', function (d, i){
-                d3.select(this)
-                    .transition().duration(100)
-                    .attr('opacity', 1)
-                    .attr('stroke-width', 5)
-                    .attr('stroke', 'black')
-            })
+        .on('mouseover', mouseOver)
+        .on('mouseout', mouseOut)
 
-    svg.selectAll('circle')
-        .on('mouseout', function (d, i){
-            d3.select(this)
-                .transition().duration(100)
-                .attr('opacity', 0.8)
-                .attr('stroke-width', 0)
-        })
+    function mouseOver(d, i){
+        d3.select(this)
+            .transition('mouseover').duration(100)
+            .attr('opacity', 1)
+            .attr('stroke-width', 5)
+            .attr('stroke', 'black')
+            
+        d3.select('#tooltip')
+            .style('left', (d3.event.pageX + 10)+ 'px')
+            .style('top', (d3.event.pageY - 25) + 'px')
+            .style('display', 'inline-block')
+            .html(`Major: ${d.Major.toLowerCase()} <br> Median Salary: $${d.Median} <br> Category: ${d.Category}<br>% Female: ${Math.round(d.ShareWomen*100)}`)
+    }
     
-    nodes.append('title')
-        .text(d => d.Major)
+    function mouseOut(d, i){
+        d3.select('#tooltip')
+            .style('display', 'none')
+
+        d3.select(this)
+            .transition('mouseout').duration(100)
+            .attr('opacity', 0.8)
+            .attr('stroke-width', 0)
+    }
 
     // Define each tick of simulation
     simulation.on('tick', () => {
@@ -188,7 +195,7 @@ function draw1(){
     
     svg.selectAll('circle')
         .transition().duration(500)
-        .attr('fill', d => categoryColorScale(d.Category))
+        .attr('fill', 'black')
         .attr('r', 3)
         .attr('cx', (d, i) => salaryXScale(d.Median))
         .attr('cy', (d, i) => i * 5.5 + 20)
@@ -260,7 +267,7 @@ function draw4(){
     svg.selectAll('circle')
         .transition('gender-scatter').duration(1000)
         .attr('cx', d => shareWomenXScale(d.ShareWomen))
-        .attr('cy', d => 1000 - salaryXScale(d.Median))
+        .attr('cy', d => salaryYScale(d.Median))
         .attr('fill', colorByGender)
         .attr('r', 10)
 
