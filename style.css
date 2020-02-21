@@ -7,7 +7,7 @@ body {
     position: relative;
     display: inline-block;
     width: 400px;
-    top: 0px;
+    top: 60px;
     z-index: 90;
     margin-right: 50px;
 }
