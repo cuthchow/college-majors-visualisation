@@ -67,29 +67,3 @@ function scroller(){
     return scroll;
 }
 
-
-// let sectionPositions = []
-
-
-// let sections = d3.selectAll('.step')
-
-// let startPos;
-
-// sections.each(function(d, i) {
-//     let top = this.getBoundingClientRect().top;
-
-//     if (i === 0 ){
-//         startPos = top;
-//     }
-//     sectionPositions.push(top - startPos)
-// });
-
-// function position() {
-//     let pos = window.pageYOffset - 10;
-//     let sectionIndex = d3.bisect(sectionPositions, pos);
-//     sectionIndex = Math.min(sections.size()-1, sectionIndex);
-
-//     console.log(sectionIndex)
-// }
-
-

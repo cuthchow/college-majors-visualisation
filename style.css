@@ -15,6 +15,8 @@ body {
 .step {
     margin-bottom: 300px;
     font-family: "Merriweather";
+    font-weight: 100;
+    line-height: 1.4rem;
 }
 
 #graphic {
@@ -28,11 +30,15 @@ body {
 #vis {
     display: inline-block;
     position: fixed;
-    top: 60px;
+    top: 30px;
     z-index: 1;
     margin-left: 0;
     height: 1000px;
     width: 1000px;
-    background-color: #ddd;
+    background-color: rgb(238, 238, 238);
+}
+
+.tick line {
+    stroke: 'red'
 }
 
