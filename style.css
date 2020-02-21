@@ -13,7 +13,8 @@ body {
 }
 
 .step {
-    margin-bottom: 300px;
+    margin-bottom: 100px;
+    height: 700px;
     font-family: "Merriweather";
     font-weight: 100;
     line-height: 1.4rem;
