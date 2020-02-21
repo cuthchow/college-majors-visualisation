@@ -1,27 +1,33 @@
+@import url('https://fonts.googleapis.com/css?family=Merriweather&display=swap');
+
+body {
+}
+
 #sections {
     position: relative;
     display: inline-block;
-    width: 300px;
+    width: 400px;
     top: 0px;
     z-index: 90;
+    margin-right: 50px;
 }
 
 .step {
-    margin-bottom: 200px;
-
+    margin-bottom: 300px;
+    font-family: "Merriweather";
 }
 
 #graphic {
-    display: flex;
-    width: 100%;
+    margin: auto;
+    width: 1500px;
     flex-direction: row;
-    align-items: center;
+    align-items: top;
     justify-content: space-around;
 }
 
 #vis {
-
-
+    display: inline-block;
+    position: fixed;
     top: 60px;
     z-index: 1;
     margin-left: 0;
