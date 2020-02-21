@@ -1,0 +1,32 @@
+#sections {
+    position: relative;
+    display: inline-block;
+    width: 300px;
+    top: 0px;
+    z-index: 90;
+}
+
+.step {
+    margin-bottom: 200px;
+
+}
+
+#graphic {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+#vis {
+
+
+    top: 60px;
+    z-index: 1;
+    margin-left: 0;
+    height: 1000px;
+    width: 1000px;
+    background-color: #ddd;
+}
+
