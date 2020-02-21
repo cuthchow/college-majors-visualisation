@@ -167,6 +167,8 @@ function draw1(){
                     .select('svg')
                     .attr('width', 1000)
                     .attr('height', 1000)
+    
+    svg.selectAll('text').remove()
 
     let xAxis = d3.axisBottom(salaryXScale)
                     .ticks(4)
@@ -206,8 +208,8 @@ function draw1(){
 function draw2(){
     let svg = d3.select("#vis").select('svg')
     
-    svg.selectAll('g').transition().remove()
-    svg.selectAll('text').transition().remove()
+    svg.selectAll('g').remove()
+    svg.selectAll('text').remove()
 
     svg.selectAll('circle')
         .transition('small-multiples-categories').duration(500)
@@ -217,13 +219,25 @@ function draw2(){
     //Reheat simulation and restart
     simulation.alpha([1]).restart()
 
-    svg.selectAll('text')
-        .data(categories).enter()
-        .append('text')
-            .text(d => d.value)
-            .attr('x', d => categoriesXY[d.value][0] + 200)
-            .attr('y', d => categoriesXY[d.value][1])
+    
     // simulation.restart()
+}
+
+function draw22(){
+    let svg = d3.select("#vis").select('svg')
+
+    svg.selectAll('text')
+    .data(categories).enter()
+    .append('text')
+        .text(d => d)
+        .transition('label-small-multiple').duration(500).delay((d, i) => i * 50)
+        .attr('x', d => categoriesXY[d][0] + 200)
+        .attr('y', d => categoriesXY[d][1])
+        .attr('font-family', 'Domine')
+        .attr('font-size', '12px')
+        .attr('font-weight', 700)
+        .attr('fill', 'grey')
+        .attr('text-anchor', 'middle')
 }
 
 function draw3(){
@@ -333,4 +347,10 @@ scroll.on('active', function(index){
     activationFunctions[index]()
     // activationFunctions[index]()
 
+})
+
+scroll.on('progress', function(index, progress){
+    if (index == 1 & progress > 0.5){
+        draw22();
+    }
 })
