@@ -57,7 +57,8 @@ function createScales(){
     salaryYScale = d3.scaleLinear([20000, 110000], [margin.top + height, margin.top])
     categoryColorScale = d3.scaleOrdinal(categories, d3.schemeSet3)
     shareWomenXScale = d3.scaleLinear(d3.extent(dataset, d => d.ShareWomen), [margin.left, margin.left + width])
-    enrollmentScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [margin.left, margin.left + width])
+    enrollmentScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [margin.left + 120, margin.left + width - 50])
+    enrollmentSizeScale = d3.scaleLinear(d3.extent(dataset, d=> d.Total), [10,60])
 }
 
 
@@ -120,7 +121,11 @@ function drawInitial(){
             .style('left', (d3.event.pageX + 10)+ 'px')
             .style('top', (d3.event.pageY - 25) + 'px')
             .style('display', 'inline-block')
-            .html(`Major: ${d.Major.toLowerCase()} <br> Median Salary: $${d3.format(",.2r")(d.Median)} <br> Category: ${d.Category}<br>% Female: ${Math.round(d.ShareWomen*100)}`)
+            .html(`<strong>Major:</strong> ${d.Major[0] + d.Major.slice(1,).toLowerCase()} 
+                <br> <strong>Median Salary:</strong> $${d3.format(",.2r")(d.Median)} 
+                <br> <strong>Category:</strong> ${d.Category}
+                <br> <strong>% Female:</strong> ${Math.round(d.ShareWomen*100)}%
+                <br> <strong># Enrolled:</strong> ${d3.format(",.2r")(d.Total)}`)
     }
     
     function mouseOut(d, i){
@@ -211,6 +216,7 @@ function draw2(){
     
     svg.selectAll('g').remove()
     svg.selectAll('text').remove()
+    svg.selectAll('rect').remove()
 
     svg.selectAll('circle')
         .transition('small-multiples-categories').duration(500).delay((d, i) => i * 5)
@@ -227,58 +233,82 @@ function draw2(){
     // simulation.restart()
 }
 
-function draw22(){
+function draw3(){
     let svg = d3.select("#vis").select('svg')
-
-    svg.selectAll('text')
-            .text(d => d)
-            .transition('label-small-multiple').duration(200).delay((d, i) => i * 50)
-            .attr('x', d => categoriesXY[d][0] + 200)
-            .attr('y', d => categoriesXY[d][1] + 100)
-            .attr('font-family', 'Domine')
-            .attr('font-size', '12px')
-            .attr('font-weight', 700)
-            .attr('fill', 'black')
-            .attr('text-anchor', 'middle')
     
     svg.selectAll('rect')
         .data(categories).enter()
         .append('rect')
             .transition().duration(200).delay((d, i) => i * 50)
+            .attr('class', 'cat_rect')
             .attr('x', d => categoriesXY[d][0] + 120)
             .attr('y', d => categoriesXY[d][1] +80)
             .attr('width', 160)
             .attr('height', 30)
             .attr('opacity', 0.2)
             .attr('fill', 'grey')
-}
-
-function draw23(){
-    let svg = d3.select("#vis").select('svg')
 
     svg.selectAll('text')
-        .attr('opacity', 1)
-        .text(d => `Average: $${categoriesXY[d][2]}`)
+            .text(d => d)
+            .transition('label-small-multiple').duration(200).delay((d, i) => i * 50)
+            .attr('x', d => categoriesXY[d][0] + 200)
+            .attr('y', d => categoriesXY[d][1] + 100)
+            .attr('class', 'cat_label')
+            .attr('font-family', 'Domine')
+            .attr('font-size', '12px')
+            .attr('font-weight', 700)
+            .attr('fill', 'black')
+            .attr('text-anchor', 'middle')
+
+    svg.selectAll('.cat_label')
+        .on('mouseover', d => {
+            d3.select(this).text('yo')
+            console.log('yo')
+        })
+
+    
+    
+    
 }
 
-function draw3(){
+function draw32(){
+    let svg = d3.select("#vis").select('svg')
+
+    svg.selectAll('.cat_label')
+        .transition().duration(200)
+            .attr('fill', 'white')
+            .attr('opacity', 1)
+        .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
+        .transition().duration(200)
+            .attr('fill', 'black')
+    
+    svg.selectAll('circle')
+        .transition('small-multiples-categories').duration(500).delay((d, i) => i * 5)
+        .attr('r', d => salarySizeScale(d.Median))
+        .attr('fill', d => categoryColorScale(d.Category))
+}
+
+function draw4(){
 
     simulation
         .force('forceX', d3.forceX(d => categoriesXY[d.Category][0]+ 200))
         .force('forceY', d3.forceY(d => categoriesXY[d.Category][1]))
+        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 2))
 
     simulation.alpha(1).restart()
 
     let svg = d3.select('#vis').select('svg')
-    svg.selectAll('g').transition().remove()
-    svg.selectAll('path').transition().duration(300).attr('opacity', 0)
+    svg.selectAll('g').transition().duration(300).attr('opacity', 0).remove()
+    svg.selectAll('path').transition().duration(500).attr('opacity', 0)
+    svg.selectAll('text').transition().attr('opacity', 1)
+    svg.selectAll('rect').transition().duration(100).attr('opacity', 0.2)
 
     svg.selectAll('circle')
         .transition('small-multiples-gender').duration(500).delay((d, i) => i * 5)
             .attr('fill', colorByGender)
             .attr('r', d => salarySizeScale(d.Median))
     
-    svg.selectAll('text')
+    svg.selectAll('.cat_label')
         .text(d => `% Female: ${categoriesXY[d][3]}%`)
 }
 
@@ -292,13 +322,13 @@ function colorByGender(d, i){
     }
 }
 
-function draw4(){
+function draw5(){
     simulation.stop()
     
     let svg = d3.select("#vis").select("svg")
     svg.selectAll('g').attr('opacity', 0).transition().remove()
-    svg.selectAll('text').transition().attr('opacity', 0).remove()
-    svg.selectAll('rect').transition().duration(100).attr('opacity', 0).remove()
+    svg.selectAll('.cat_label').transition().attr('opacity', 0)
+    svg.selectAll('.cat_rect').transition().duration(100).attr('opacity', 0)
 
     let xAxis = d3.axisBottom(shareWomenXScale)
     let yAxis = d3.axisLeft(salaryYScale)
@@ -311,11 +341,13 @@ function draw4(){
         .attr('r', 10)
 
     svg.append('g')
+        .attr('opacity', 1)
         .call(xAxis)
             .transition(500)
             .attr('transform', `translate(0, ${height})`)
     
     svg.append('g')
+        .attr('opacity', 1)
         .call(yAxis)
             .transition(500)
             .attr('transform', `translate(${margin.left - 20}, 0)`)
@@ -330,19 +362,44 @@ function draw4(){
             .attr('opacity', 1)
             .attr('d', lineFunction(bestFitLine))
             .attr('stroke', 'grey')
+            .attr('stroke-dasharray', 6.2)
+            .attr('opacity', 0.5)
             .attr('stroke-width', 3)
 }
 
-function draw5(){
+
+function draw6(){
+    let svg = d3.select('#vis').select('svg')
+
+    svg.selectAll('g').transition().remove()
+    svg.selectAll('path').transition().duration(200).attr('opacity', 0).remove()
+
+    simulation
+        .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
+        .force('forceY', d3.forceY(500))
+        .force('collide', d3.forceCollide(d => enrollmentSizeScale(d.Total) + 5))
+
+    svg.selectAll('circle')
+        .transition('colour-by-cat')
+        .attr('r', d => enrollmentSizeScale(d.Total))
+        .attr('fill', d => categoryColorScale(d.Category))
+
+    simulation.alpha(0.7).restart()
+    
+
+}
+
+function draw7(){
     let svg = d3.select('#vis').select('svg')
     svg.selectAll('g').transition().remove()
-    svg.selectAll('text').transition().remove()
 
     simulation  
         .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
         .force('forceY', d3.forceY(500))
 
     simulation.alpha(1).restart()
+
+   
 
     let xAxis = d3.axisBottom(enrollmentScale)
     svg.append('g').call(xAxis).transition(500).attr('transform', 'translate(0, 700)')
@@ -359,7 +416,9 @@ let activationFunctions = [
     draw2,
     draw3,
     draw4, 
-    draw5
+    draw5, 
+    draw6, 
+    draw7
 ]
 
 
@@ -397,9 +456,7 @@ scroll.on('active', function(index){
 })
 
 scroll.on('progress', function(index, progress){
-    if (index == 1 & progress > 0.4 & progress < 0.7){
-        draw22();
-    } else if (index == 1 & progress >= 0.7){
-        draw23();
+    if (index == 2 & progress > 0.7){
+        draw32();
     }
 })

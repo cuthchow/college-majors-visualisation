@@ -24,8 +24,18 @@ body {
     text-align: justify;
 }
 
-h1 {
+h1, h2 {
     font-weight: 700;
+    text-align: right;
+    line-height: 2.3rem;
+}
+
+h1 {
+    font-size: 35px;
+}
+
+strong {
+    color: rgb(245, 155, 155);
 }
 
 #graphic {
