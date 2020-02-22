@@ -54,7 +54,7 @@ d3.csv('data/recent-grads.csv', function(d){
 function createScales(){
     salarySizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [5, 35])
     salaryXScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [margin.left, margin.left + width + 200])
-    salaryYScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [margin.top + height, margin.top])
+    salaryYScale = d3.scaleLinear([20000, 110000], [margin.top + height, margin.top])
     categoryColorScale = d3.scaleOrdinal(categories, d3.schemeSet3)
     shareWomenXScale = d3.scaleLinear(d3.extent(dataset, d => d.ShareWomen), [margin.left, margin.left + width])
     enrollmentScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [margin.left, margin.left + width])
@@ -120,7 +120,7 @@ function drawInitial(){
             .style('left', (d3.event.pageX + 10)+ 'px')
             .style('top', (d3.event.pageY - 25) + 'px')
             .style('display', 'inline-block')
-            .html(`Major: ${d.Major.toLowerCase()} <br> Median Salary: $${d.Median} <br> Category: ${d.Category}<br>% Female: ${Math.round(d.ShareWomen*100)}`)
+            .html(`Major: ${d.Major.toLowerCase()} <br> Median Salary: $${d3.format(",.2r")(d.Median)} <br> Category: ${d.Category}<br>% Female: ${Math.round(d.ShareWomen*100)}`)
     }
     
     function mouseOut(d, i){
@@ -232,23 +232,23 @@ function draw22(){
 
     svg.selectAll('text')
             .text(d => d)
-            .transition('label-small-multiple').duration(500).delay((d, i) => i * 50)
+            .transition('label-small-multiple').duration(200).delay((d, i) => i * 50)
             .attr('x', d => categoriesXY[d][0] + 200)
             .attr('y', d => categoriesXY[d][1] + 100)
             .attr('font-family', 'Domine')
             .attr('font-size', '12px')
             .attr('font-weight', 700)
-            .attr('fill', 'grey')
+            .attr('fill', 'black')
             .attr('text-anchor', 'middle')
     
     svg.selectAll('rect')
         .data(categories).enter()
         .append('rect')
-            .transition().duration(500).delay((d, i) => i * 50)
+            .transition().duration(200).delay((d, i) => i * 50)
             .attr('x', d => categoriesXY[d][0] + 120)
-            .attr('y', d => categoriesXY[d][1] + 75)
+            .attr('y', d => categoriesXY[d][1] +80)
             .attr('width', 160)
-            .attr('height', 40)
+            .attr('height', 30)
             .attr('opacity', 0.2)
             .attr('fill', 'grey')
 }
@@ -271,11 +271,12 @@ function draw3(){
 
     let svg = d3.select('#vis').select('svg')
     svg.selectAll('g').transition().remove()
+    svg.selectAll('path').transition().duration(300).attr('opacity', 0)
 
     svg.selectAll('circle')
         .transition('small-multiples-gender').duration(500).delay((d, i) => i * 5)
-        .attr('fill', colorByGender)
-        .attr('r', d => salarySizeScale(d.Median))
+            .attr('fill', colorByGender)
+            .attr('r', d => salarySizeScale(d.Median))
     
     svg.selectAll('text')
         .text(d => `% Female: ${categoriesXY[d][3]}%`)
@@ -319,6 +320,17 @@ function draw4(){
             .transition(500)
             .attr('transform', `translate(${margin.left - 20}, 0)`)
 
+    const bestFitLine = [{x: 0, y: 56093}, {x: 1, y: 25423}]
+    const lineFunction = d3.line()
+                            .x(d => shareWomenXScale(d.x))
+                            .y(d => salaryYScale(d.y))
+
+    svg.append('path')
+        .transition('best-fit-line').duration(400)
+            .attr('opacity', 1)
+            .attr('d', lineFunction(bestFitLine))
+            .attr('stroke', 'grey')
+            .attr('stroke-width', 3)
 }
 
 function draw5(){
@@ -334,6 +346,7 @@ function draw5(){
 
     let xAxis = d3.axisBottom(enrollmentScale)
     svg.append('g').call(xAxis).transition(500).attr('transform', 'translate(0, 700)')
+
 
 }
 
@@ -364,17 +377,27 @@ let scroll = scroller()
 
 scroll()
 
+let lastIndex, activeIndex = 0
+
 scroll.on('active', function(index){
     d3.selectAll('.step')
         .style('opacity', function (d, i) {return i === index ? 1 : 0.1;});
     
-    activationFunctions[index]()
+    activeIndex = index
+    let sign = (activeIndex - lastIndex) < 0 ? -1 : 1; 
+    let scrolledSections = d3.range(lastIndex + sign, activeIndex + sign, sign);
+    scrolledSections.forEach(i => {
+        activationFunctions[i]();
+    })
+    lastIndex = activeIndex;
+    
+    // activationFunctions[index]()
     // activationFunctions[index]()
 
 })
 
 scroll.on('progress', function(index, progress){
-    if (index == 1 & progress > 0.3 & progress < 0.7){
+    if (index == 1 & progress > 0.4 & progress < 0.7){
         draw22();
     } else if (index == 1 & progress >= 0.7){
         draw23();
