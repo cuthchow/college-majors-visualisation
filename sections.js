@@ -377,7 +377,7 @@ function draw6(){
     simulation
         .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
         .force('forceY', d3.forceY(500))
-        .force('collide', d3.forceCollide(d => enrollmentSizeScale(d.Total) + 5))
+        .force('collide', d3.forceCollide(d => enrollmentSizeScale(d.Total) + 2))
 
     svg.selectAll('circle')
         .transition('colour-by-cat')
