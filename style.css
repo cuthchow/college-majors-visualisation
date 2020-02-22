@@ -15,6 +15,10 @@ body {
     margin-right: 50px;
 }
 
+.categoryLegend {
+    font-family: "Domine";
+}
+
 .step {
     margin-bottom: 100px;
     height: 700px;
@@ -36,6 +40,15 @@ h1 {
 
 strong {
     color: rgb(245, 155, 155);
+}
+
+#info {
+    background-color: black;
+    width: 500px;
+    height: 1200px;
+    position: fixed;
+    margin: -10px;
+    float: right;
 }
 
 #graphic {

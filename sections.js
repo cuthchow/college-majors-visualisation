@@ -1,6 +1,7 @@
 let dataset, svg
 let salarySizeScale, salaryXScale, categoryColorScale
 let simulation, nodes
+let categoryLegend, salaryLegend
 
 const categories = ['Engineering', 'Business', 'Physical Sciences', 'Law & Public Policy', 'Computers & Mathematics', 'Agriculture & Natural Resources',
 'Industrial Arts & Consumer Services','Arts', 'Health','Social Science', 'Biology & Life Science','Education','Humanities & Liberal Arts',
@@ -61,6 +62,21 @@ function createScales(){
     enrollmentSizeScale = d3.scaleLinear(d3.extent(dataset, d=> d.Total), [10,60])
 }
 
+function createLegend(x, y){
+    let svg = d3.select('#vis').select('svg')
+    
+    svg.append('g')
+        .attr('class', 'categoryLegend')
+        .attr('transform', `translate(${x},${y})`)
+
+    categoryLegend = d3.legendColor()
+                            .shape('path', d3.symbol().type(d3.symbolCircle).size(150)())
+                            .shapePadding(10)
+                            .scale(categoryColorScale)
+    
+    d3.select('.categoryLegend')
+        .call(categoryLegend)
+}
 
 //Draws the initial stuff
 //This will include all the baseline things such as the bubbles
@@ -175,6 +191,7 @@ function draw1(){
     
     svg.selectAll('text').remove()
     svg.selectAll('rect').remove()
+    d3.select('.categoryLegend').remove()
 
     let xAxis = d3.axisBottom(salaryXScale)
                     .ticks(4)
@@ -230,7 +247,7 @@ function draw2(){
         .data(categories).enter()
         .append('text')
     
-    // simulation.restart()
+    createLegend(700, 500)
 }
 
 function draw3(){
@@ -275,9 +292,6 @@ function draw32(){
     let svg = d3.select("#vis").select('svg')
 
     svg.selectAll('.cat_label')
-        .transition().duration(200)
-            .attr('fill', 'white')
-            .attr('opacity', 1)
         .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
         .transition().duration(200)
             .attr('fill', 'black')
