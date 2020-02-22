@@ -42,15 +42,6 @@ strong {
     color: rgb(245, 155, 155);
 }
 
-#info {
-    background-color: black;
-    width: 500px;
-    height: 1200px;
-    position: fixed;
-    margin: -10px;
-    float: right;
-}
-
 #graphic {
     margin: auto;
     width: 1500px;
@@ -67,7 +58,6 @@ strong {
     margin-left: 0;
     height: 1000px;
     width: 1000px;
-
 }
 
 .tick line {

@@ -63,8 +63,8 @@ function createScales(){
 }
 
 function createLegend(x, y){
-    let svg = d3.select('#vis').select('svg')
-    
+    let svg = d3.select('#legend')
+
     svg.append('g')
         .attr('class', 'categoryLegend')
         .attr('transform', `translate(${x},${y})`)
@@ -163,7 +163,6 @@ function drawInitial(){
 
     // Stop the simulation until later
     simulation.stop()
-
     
     svg.selectAll('text')
         .data(dataset)
@@ -247,7 +246,7 @@ function draw2(){
         .data(categories).enter()
         .append('text')
     
-    createLegend(700, 500)
+    createLegend(20, 50)
 }
 
 function draw3(){
