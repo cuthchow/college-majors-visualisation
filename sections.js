@@ -6,22 +6,22 @@ const categories = ['Engineering', 'Business', 'Physical Sciences', 'Law & Publi
 'Industrial Arts & Consumer Services','Arts', 'Health','Social Science', 'Biology & Life Science','Education','Humanities & Liberal Arts',
 'Psychology & Social Work','Communications & Journalism','Interdisciplinary']
 
-const categoriesXY = {'Engineering': [0, 400],
-                        'Business': [0, 600],
-                        'Physical Sciences': [0, 800],
-                        'Law & Public Policy': [0, 200],
-                        'Computers & Mathematics': [200, 400],
-                        'Agriculture & Natural Resources': [200, 600],
-                        'Industrial Arts & Consumer Services': [200, 800],
-                        'Arts': [200, 200],
-                        'Health': [400, 400],
-                        'Social Science': [400, 600],
-                        'Biology & Life Science': [400, 800],
-                        'Education': [400, 200],
-                        'Humanities & Liberal Arts': [600, 400],
-                        'Psychology & Social Work': [600, 600],
-                        'Communications & Journalism': [600, 800],
-                        'Interdisciplinary': [600, 200]}
+const categoriesXY = {'Engineering': [0, 400, 57382, 23.9],
+                        'Business': [0, 600, 43538, 48.3],
+                        'Physical Sciences': [0, 800, 41890, 50.9],
+                        'Law & Public Policy': [0, 200, 42200, 48.3],
+                        'Computers & Mathematics': [200, 400, 42745, 31.2],
+                        'Agriculture & Natural Resources': [200, 600, 36900, 40.5],
+                        'Industrial Arts & Consumer Services': [200, 800, 36342, 35.0],
+                        'Arts': [200, 200, 33062, 60.4],
+                        'Health': [400, 400, 36825, 79.5],
+                        'Social Science': [400, 600, 37344, 55.4],
+                        'Biology & Life Science': [400, 800, 36421, 58.7],
+                        'Education': [400, 200, 32350, 74.9],
+                        'Humanities & Liberal Arts': [600, 400, 31913, 63.2],
+                        'Psychology & Social Work': [600, 600, 30100, 79.4],
+                        'Communications & Journalism': [600, 800, 34500, 65.9],
+                        'Interdisciplinary': [600, 200, 35000, 77.1]}
 
 const margin = {left: 150, top: 20, bottom: 20, right: 20}
 const width = 1000 - margin.left - margin.right
@@ -169,6 +169,7 @@ function draw1(){
                     .attr('height', 1000)
     
     svg.selectAll('text').remove()
+    svg.selectAll('rect').remove()
 
     let xAxis = d3.axisBottom(salaryXScale)
                     .ticks(4)
@@ -196,7 +197,7 @@ function draw1(){
         .attr('text-anchor', 'end')
     
     svg.selectAll('circle')
-        .transition().duration(500)
+        .transition('initial-scatter').duration(500).delay(500)
         .attr('fill', 'black')
         .attr('r', 3)
         .attr('cx', (d, i) => salaryXScale(d.Median))
@@ -212,13 +213,16 @@ function draw2(){
     svg.selectAll('text').remove()
 
     svg.selectAll('circle')
-        .transition('small-multiples-categories').duration(500)
+        .transition('small-multiples-categories').duration(500).delay((d, i) => i * 5)
         .attr('r', d => salarySizeScale(d.Median))
         .attr('fill', d => categoryColorScale(d.Category))
 
     //Reheat simulation and restart
     simulation.alpha([1]).restart()
 
+    svg.selectAll('text')
+        .data(categories).enter()
+        .append('text')
     
     // simulation.restart()
 }
@@ -227,17 +231,34 @@ function draw22(){
     let svg = d3.select("#vis").select('svg')
 
     svg.selectAll('text')
-    .data(categories).enter()
-    .append('text')
-        .text(d => d)
-        .transition('label-small-multiple').duration(500).delay((d, i) => i * 50)
-        .attr('x', d => categoriesXY[d][0] + 200)
-        .attr('y', d => categoriesXY[d][1])
-        .attr('font-family', 'Domine')
-        .attr('font-size', '12px')
-        .attr('font-weight', 700)
-        .attr('fill', 'grey')
-        .attr('text-anchor', 'middle')
+            .text(d => d)
+            .transition('label-small-multiple').duration(500).delay((d, i) => i * 50)
+            .attr('x', d => categoriesXY[d][0] + 200)
+            .attr('y', d => categoriesXY[d][1] + 100)
+            .attr('font-family', 'Domine')
+            .attr('font-size', '12px')
+            .attr('font-weight', 700)
+            .attr('fill', 'grey')
+            .attr('text-anchor', 'middle')
+    
+    svg.selectAll('rect')
+        .data(categories).enter()
+        .append('rect')
+            .transition().duration(500).delay((d, i) => i * 50)
+            .attr('x', d => categoriesXY[d][0] + 120)
+            .attr('y', d => categoriesXY[d][1] + 75)
+            .attr('width', 160)
+            .attr('height', 40)
+            .attr('opacity', 0.2)
+            .attr('fill', 'grey')
+}
+
+function draw23(){
+    let svg = d3.select("#vis").select('svg')
+
+    svg.selectAll('text')
+        .attr('opacity', 1)
+        .text(d => `Average: $${categoriesXY[d][2]}`)
 }
 
 function draw3(){
@@ -250,12 +271,14 @@ function draw3(){
 
     let svg = d3.select('#vis').select('svg')
     svg.selectAll('g').transition().remove()
-    svg.selectAll('text').transition().remove()
 
     svg.selectAll('circle')
-        .transition('small-multiples-gender').duration(500).delay((d, i) => i * 10)
+        .transition('small-multiples-gender').duration(500).delay((d, i) => i * 5)
         .attr('fill', colorByGender)
         .attr('r', d => salarySizeScale(d.Median))
+    
+    svg.selectAll('text')
+        .text(d => `% Female: ${categoriesXY[d][3]}%`)
 }
 
 function colorByGender(d, i){
@@ -274,6 +297,7 @@ function draw4(){
     let svg = d3.select("#vis").select("svg")
     svg.selectAll('g').attr('opacity', 0).transition().remove()
     svg.selectAll('text').transition().attr('opacity', 0).remove()
+    svg.selectAll('rect').transition().duration(100).attr('opacity', 0).remove()
 
     let xAxis = d3.axisBottom(shareWomenXScale)
     let yAxis = d3.axisLeft(salaryYScale)
@@ -350,7 +374,9 @@ scroll.on('active', function(index){
 })
 
 scroll.on('progress', function(index, progress){
-    if (index == 1 & progress > 0.5){
+    if (index == 1 & progress > 0.3 & progress < 0.7){
         draw22();
+    } else if (index == 1 & progress >= 0.7){
+        draw23();
     }
 })
