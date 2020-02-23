@@ -49,8 +49,9 @@ d3.csv('data/recent-grads.csv', function(d){
     dataset = data
     console.log(dataset)
     createScales()
-    drawInitial()
     createSizeLegend()
+    setTimeout(drawInitial(), 500)
+
 })
 
 //Create all the scales and save to global variables
@@ -221,7 +222,7 @@ function draw1(){
     
     svg.selectAll('rect').transition().remove()
     d3.select('.categoryLegend').transition().remove()
-    svg.selectAll('.lab-text').transition().attr('opacity', 0)
+    svg.selectAll('.lab-text').transition('get-rid').attr('opacity', 0)
 
 
     let xAxis = d3.axisBottom(salaryXScale)
@@ -247,6 +248,9 @@ function draw1(){
 
     svg.selectAll('.small-text')
         .attr('opacity', 1)
+
+        svg.selectAll('.lab-text').transition('get-rid').attr('opacity', 0)
+
 
 }
 
@@ -304,16 +308,16 @@ function draw3(){
             .attr('text-anchor', 'middle')    
 
  
-    svg.selectAll('.cat_label')
+    svg.selectAll('.lab-text')
         .on('mouseover', function(d, i){
             console.log('yo')
             d3.select(this)
                 .text(d)
         })
-        // .on('mouseout', function(d, i){
-        //     d3.select(this)
-        //         .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
-        // })
+        .on('mouseout', function(d, i){
+            d3.select(this)
+                .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
+        })
 
 }
 
