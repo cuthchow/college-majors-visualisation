@@ -298,8 +298,7 @@ function draw1(){
                     .attr('width', 1000)
                     .attr('height', 950)
     
-    svg.selectAll('.cat-rect').transition().attr('opacity', 0)
-    svg.selectAll('.lab-text').transition('get-rid').attr('opacity', 0)
+    clean(false, false, true, false, false)
 
     d3.select('.categoryLegend').transition().remove()
 
@@ -314,20 +313,13 @@ function draw1(){
         .attr('cy', (d, i) => i * 5.2 + 30)
 
     svg.selectAll('.small-text').transition().attr('opacity', 1)
-
-    svg.selectAll('.lab-text').transition('get-rid').attr('opacity', 0)
 }
 
 
 function draw2(){
     let svg = d3.select("#vis").select('svg')
     
-    svg.select('.first-axis')
-        .attr('opacity', 0)
-    
-    svg.selectAll('.small-text').transition().attr('opacity', 0)
-    svg.selectAll('.lab-text').transition().attr('opacity', 0)
-    svg.selectAll('.cat-rect').transition().attr('opacity', 0)
+    clean(false, false, false, false, false)
 
     svg.selectAll('circle')
         .transition().duration(200).delay((d, i) => i * 2)
@@ -349,6 +341,7 @@ function draw2(){
 
 function draw3(){
     let svg = d3.select("#vis").select('svg')
+    clean(false, true, false, false, false)
     
     svg.selectAll('circle')
         .transition().duration(300).delay((d, i) => i * 2)
@@ -376,10 +369,7 @@ function draw4(){
     simulation.alpha(1).restart()
 
     let svg = d3.select('#vis').select('svg')
-    svg.selectAll('path').transition().duration(300).attr('opacity', 0)
-    svg.select('.scatter-x').transition().duration(300).attr('opacity', 0)
-    svg.select('.scatter-y').transition().duration(300).attr('opacity', 0)
-    svg.select('.best-fit').transition().duration(300).attr('opacity', 0)
+    clean(false, true, false, false, false)
    
     svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 20)
         .text(d => `% Female: ${(categoriesXY[d][3])}%`)
@@ -411,14 +401,10 @@ function draw5(){
     simulation.stop()
     
     let svg = d3.select("#vis").select("svg")
-    svg.selectAll('.lab-text').transition('hide-cat-label').attr('opacity', 0)
-    svg.selectAll('.cat-rect').transition('hide-cat-rect').attr('opacity', 0)
+    clean(true, false, false, false, false)
 
     svg.selectAll('.scatter-x').transition().attr('opacity', 0.6).selectAll('.domain').attr('opacity', 1)
     svg.selectAll('.scatter-y').transition().attr('opacity', 0.6).selectAll('.domain').attr('opacity', 1)
-
-    svg.selectAll('.hist-axis').transition().attr('opacity', 0)
-    svg.selectAll('.enrolment-axis').transition().attr('opacity', 0)
 
     svg.selectAll('circle')
         .transition('gender-scatter').duration(700)
@@ -434,11 +420,7 @@ function draw5(){
 function draw6(){
     let svg = d3.select('#vis').select('svg')
 
-    svg.select('.scatter-x').transition().attr('opacity', 0)
-    svg.select('.scatter-y').transition().attr('opacity', 0)
-    svg.selectAll('.lab-text').transition('hide-cat-label').attr('opacity', 0)
-    svg.selectAll('.cat-rect').transition('hide-cat-rect').attr('opacity', 0)
-    svg.select('.best-fit').transition().duration(200).attr('opacity', 0)
+    clean(false, false, false, false, true)
 
     simulation
         .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
@@ -452,9 +434,6 @@ function draw6(){
 
     //Show enrolment axis (remember to include domain)
     svg.select('.enrolment-axis').attr('opacity', 0.5).selectAll('.domain').attr('opacity', 1)
-    
-    //Hide the histogram axis
-    svg.selectAll('.hist-axis').attr('opacity', 0)
 
     simulation.alpha(0.5).restart()
 
@@ -463,19 +442,16 @@ function draw6(){
 function draw7(){
     let svg = d3.select('#vis').select('svg')
 
-    svg.select('.enrolment-axis')
-        .attr('opacity', 0)
-
-    svg.selectAll('.lab-text').transition('hide-cat-label').attr('opacity', 0)
-    svg.selectAll('.cat-rect').transition('hide-cat-rect').attr('opacity', 0)
+    clean(false, false, false, true, false)
 
     simulation.stop()
 
     svg.selectAll('circle')
-        .transition().duration(600).delay((d, i) => i * 2).ease(d3.easeElastic, 3)
+        .transition('hist').duration(400).delay((d, i) => i * 2).ease(d3.easeElastic, 3)
             .attr('r', 10)
             .attr('cx', d => histXScale(d.Midpoint))
             .attr('cy', d => histYScale(d.HistCol))
+            .attr('fill', d => categoryColorScale(d.Category))
 
     let xAxis = d3.axisBottom(histXScale)
     svg.append('g')
@@ -487,6 +463,32 @@ function draw7(){
 function draw8(){
 
 }
+
+function clean(isScatter, isMultiples, isFirst, isHist, isBubble){
+    let svg = d3.select('#vis').select('svg')
+    if (!isScatter) {
+        svg.select('.scatter-x').transition().attr('opacity', 0)
+        svg.select('.scatter-y').transition().attr('opacity', 0)
+        svg.select('.best-fit').transition().duration(200).attr('opacity', 0)
+    }
+    if (!isMultiples){
+        svg.selectAll('.lab-text').transition().attr('opacity', 0)
+        svg.selectAll('.cat-rect').transition().attr('opacity', 0)
+    }
+    if (!isFirst){
+        svg.select('.first-axis').transition().attr('opacity', 0)
+        svg.selectAll('.small-text').transition().attr('opacity', 0)
+    }
+    if (!isHist){
+        svg.selectAll('.hist-axis').transition().attr('opacity', 0)
+    }
+    if (!isBubble){
+        svg.select('.enrolment-axis').transition().attr('opacity', 0)
+    }
+}
+
+
+
 
 //Array of all the graph functions
 //Will be called from the scroller functionality
