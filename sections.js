@@ -126,8 +126,8 @@ function drawInitial(){
 
     simulation = d3.forceSimulation(dataset)
         .force('charge', d3.forceManyBody().strength([2]))
-        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0]+ 200))
-        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1]))
+        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
+        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
         .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 2))
         .alpha([2]).alphaDecay([0.03])
 
@@ -284,7 +284,7 @@ function draw3(){
             .transition('add_rect').delay((d, i) => i * 20)
             .attr('class', 'cat-rect')
             .attr('x', d => categoriesXY[d][0] + 120)
-            .attr('y', d => categoriesXY[d][1] +80)
+            .attr('y', d => categoriesXY[d][1] +30)
             .attr('width', 160)
             .attr('height', 30)
             .attr('opacity', 0.2)
@@ -296,7 +296,7 @@ function draw3(){
             .transition('add_lab').duration(200).delay((d, i) => i * 50 + 50)
             .attr('opacity', 1)
             .attr('x', d => categoriesXY[d][0] + 200)
-            .attr('y', d => categoriesXY[d][1] + 100)
+            .attr('y', d => categoriesXY[d][1] + 50)
             .attr('font-family', 'Domine')
             .attr('font-size', '12px')
             .attr('font-weight', 700)
@@ -320,8 +320,8 @@ function draw3(){
 function draw4(){
 
     simulation
-        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0]+ 200))
-        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1]))
+        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
+        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
         .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 2))
 
     simulation.alpha(1).restart()
