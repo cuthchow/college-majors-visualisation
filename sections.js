@@ -102,9 +102,10 @@ function createSizeLegend(){
         .call(sizeLegend)
 }
 
-//Draws the initial stuff
-//This will include all the baseline things such as the bubbles
-//Initiates the force simulation, but pauses until later 
+// All the initial elements should be create in the drawInitial function
+// As they are required, their attributes can be modified
+// They can be shown or hidden using their 'opacity' attribute
+// Each element should also have an associated class name for easy reference
 
 function drawInitial(){
     let svg = d3.select("#vis")
@@ -126,12 +127,20 @@ function drawInitial(){
             .attr('stroke-opacity', 0.2)
             .attr('stroke-dasharray', 2.5)
 
+    // Instantiates the force simulation
+    // Has no forces. Actual forces are added and removed as required
+
     simulation = d3.forceSimulation(dataset)
-        .force('charge', d3.forceManyBody().strength([2]))
-        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
-        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
-        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 4))
-        .alpha([2]).alphaDecay([0.03])
+
+     // Define each tick of simulation
+     simulation.on('tick', () => {
+        nodes
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y)
+    })
+
+    // Stop the simulation until later
+    simulation.stop()
 
     // Selection of all the circles 
     nodes = svg
@@ -179,37 +188,20 @@ function drawInitial(){
             .attr('stroke-width', 0)
     }
 
-    // Define each tick of simulation
-    simulation.on('tick', () => {
-        nodes
-            .attr('cx', d => d.x)
-            .attr('cy', d => d.y)
-    })
-
-    // Stop the simulation until later
-    simulation.stop()
-    
+    //Small text label for first graph
     svg.selectAll('.small-text')
         .data(dataset)
         .enter()
         .append('text')
-            .text((d, i) => d.Major)
+            .text((d, i) => d.Major.toLowerCase())
             .attr('class', 'small-text')
             .attr('x', margin.left)
             .attr('y', (d, i) => i * 5.2 + 30)
-            .attr('font-size', 5)
+            .attr('font-size', 7)
             .attr('text-anchor', 'end')
     
-    svg.selectAll('.lab-text')
-        .data(categories).enter()
-        .append('text')
-        .attr('class', 'lab-text')
-        .attr('opacity', 0)
-        .raise()
-
     //All the required components for the small multiples charts
     //Initialises the text and rectangles, and sets opacity to 0 
-
     svg.selectAll('.cat-rect')
         .data(categories).enter()
         .append('rect')
@@ -221,17 +213,23 @@ function drawInitial(){
             .attr('opacity', 0)
             .attr('fill', 'grey')
 
+
     svg.selectAll('.lab-text')
-            .raise()
-            .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
-            .attr('opacity', 0)
-            .attr('x', d => categoriesXY[d][0] + 200 + 1000)
-            .attr('y', d => categoriesXY[d][1] + 50)
-            .attr('font-family', 'Domine')
-            .attr('font-size', '12px')
-            .attr('font-weight', 700)
-            .attr('fill', 'black')
-            .attr('text-anchor', 'middle')    
+        .data(categories).enter()
+        .append('text')
+        .attr('class', 'lab-text')
+        .attr('opacity', 0)
+        .raise()
+
+    svg.selectAll('.lab-text')
+        .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
+        .attr('x', d => categoriesXY[d][0] + 200 + 1000)
+        .attr('y', d => categoriesXY[d][1] + 50)
+        .attr('font-family', 'Domine')
+        .attr('font-size', '12px')
+        .attr('font-weight', 700)
+        .attr('fill', 'black')
+        .attr('text-anchor', 'middle')       
 
     svg.selectAll('.lab-text')
             .on('mouseover', function(d, i){
@@ -244,28 +242,23 @@ function drawInitial(){
                     .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
             })
 
+
+    // Best fit line for gender scatter plot
+
     const bestFitLine = [{x: 0, y: 56093}, {x: 1, y: 25423}]
     const lineFunction = d3.line()
                             .x(d => shareWomenXScale(d.x))
                             .y(d => salaryYScale(d.y))
 
+    // Axes for Scatter Plot
     svg.append('path')
         .transition('best-fit-line').duration(430)
-            .attr('opacity', 1)
             .attr('class', 'best-fit')
             .attr('d', lineFunction(bestFitLine))
             .attr('stroke', 'grey')
             .attr('stroke-dasharray', 6.2)
             .attr('opacity', 0)
             .attr('stroke-width', 3)
-
-    let histxAxis = d3.axisBottom(enrollmentScale)
-    
-    svg.append('g')
-        .attr('class', 'enrolment-axis')
-        .attr('transform', 'translate(0, 700)')
-        .attr('opacity', 0)
-        .call(histxAxis)
 
     let scatterxAxis = d3.axisBottom(shareWomenXScale)
     let scatteryAxis = d3.axisLeft(salaryYScale)
@@ -281,9 +274,17 @@ function drawInitial(){
         .attr('class', 'scatter-y')
         .attr('opacity', 0)
         .attr('transform', `translate(${margin.left - 20}, 0)`)
-       
-}
 
+    // Axes for Histogram 
+
+    let histxAxis = d3.axisBottom(enrollmentScale)
+
+    svg.append('g')
+        .attr('class', 'enrolment-axis')
+        .attr('transform', 'translate(0, 700)')
+        .attr('opacity', 0)
+        .call(histxAxis)
+}
 
 //First draw function
 //Need to undo the graph of both the preceding and proceeding functions
@@ -298,8 +299,9 @@ function draw1(){
                     .attr('height', 950)
     
     svg.selectAll('.cat-rect').transition().attr('opacity', 0)
-    d3.select('.categoryLegend').transition().remove()
     svg.selectAll('.lab-text').transition('get-rid').attr('opacity', 0)
+
+    d3.select('.categoryLegend').transition().remove()
 
     svg.select('.first-axis')
         .attr('opacity', 1)
@@ -311,8 +313,7 @@ function draw1(){
         .attr('cx', (d, i) => salaryXScale(d.Median)+5)
         .attr('cy', (d, i) => i * 5.2 + 30)
 
-    svg.selectAll('.small-text')
-        .attr('opacity', 1)
+    svg.selectAll('.small-text').transition().attr('opacity', 1)
 
     svg.selectAll('.lab-text').transition('get-rid').attr('opacity', 0)
 }
@@ -332,6 +333,13 @@ function draw2(){
         .transition().duration(200).delay((d, i) => i * 2)
         .attr('r', d => salarySizeScale(d.Median))
         .attr('fill', d => categoryColorScale(d.Category))
+
+    simulation  
+        .force('charge', d3.forceManyBody().strength([2]))
+        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
+        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
+        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 4))
+        .alpha([2]).alphaDecay([0.03])
 
     //Reheat simulation and restart
     simulation.alpha([1]).restart()
@@ -374,10 +382,13 @@ function draw4(){
     svg.select('.best-fit').transition().duration(300).attr('opacity', 0)
    
     svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 20)
+        .text(d => `% Female: ${(categoriesXY[d][3])}%`)
+        .attr('x', d => categoriesXY[d][0] + 200)   
         .attr('opacity', 1)
    
     svg.selectAll('.cat-rect').transition().duration(300).delay((d, i) => i * 20)
         .attr('opacity', 0.2)
+        .attr('x', d => categoriesXY[d][0] + 120)
 
     svg.selectAll('circle')
         .transition().duration(200).delay((d, i) => i * 3)
@@ -403,8 +414,8 @@ function draw5(){
     svg.selectAll('.lab-text').transition('hide-cat-label').attr('opacity', 0)
     svg.selectAll('.cat-rect').transition('hide-cat-rect').attr('opacity', 0)
 
-    svg.select('.scatter-x').transition().attr('opacity', 1)
-    svg.select('.scatter-y').transition().attr('opacity', 1)
+    svg.selectAll('.scatter-x').transition().attr('opacity', 0.6).selectAll('.domain').attr('opacity', 1)
+    svg.selectAll('.scatter-y').transition().attr('opacity', 0.6).selectAll('.domain').attr('opacity', 1)
 
     svg.selectAll('.hist-axis').transition().attr('opacity', 0)
     svg.selectAll('.enrolment-axis').transition().attr('opacity', 0)
@@ -416,16 +427,17 @@ function draw5(){
         .attr('fill', colorByGender)
         .attr('r', 10)
 
-    svg.select('.best-fit').transition().duration(300).attr('opacity', 1)
+    svg.select('.best-fit').transition().duration(300).attr('opacity', 0.5)
    
 }
-
 
 function draw6(){
     let svg = d3.select('#vis').select('svg')
 
     svg.select('.scatter-x').transition().attr('opacity', 0)
     svg.select('.scatter-y').transition().attr('opacity', 0)
+    svg.selectAll('.lab-text').transition('hide-cat-label').attr('opacity', 0)
+    svg.selectAll('.cat-rect').transition('hide-cat-rect').attr('opacity', 0)
     svg.select('.best-fit').transition().duration(200).attr('opacity', 0)
 
     simulation
@@ -438,11 +450,11 @@ function draw6(){
         .attr('r', d => enrollmentSizeScale(d.Total))
         .attr('fill', d => categoryColorScale(d.Category))
 
-    svg.select('.enrolment-axis')
-        .attr('opacity', 0.5)
+    //Show enrolment axis (remember to include domain)
+    svg.select('.enrolment-axis').attr('opacity', 0.5).selectAll('.domain').attr('opacity', 1)
     
-    svg.selectAll('.hist-axis')
-        .attr('opacity', 0)
+    //Hide the histogram axis
+    svg.selectAll('.hist-axis').attr('opacity', 0)
 
     simulation.alpha(0.5).restart()
 
@@ -454,18 +466,13 @@ function draw7(){
     svg.select('.enrolment-axis')
         .attr('opacity', 0)
 
-    svg.selectAll('.lab-text').transition().attr('opacity', 0)
-    svg.selectAll('.cat-rect').transition().attr('opacity', 0)
+    svg.selectAll('.lab-text').transition('hide-cat-label').attr('opacity', 0)
+    svg.selectAll('.cat-rect').transition('hide-cat-rect').attr('opacity', 0)
 
-    // simulation  
-    //     .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
-    //     .force('forceY', d3.forceY(500))
-
-    // simulation.alpha(1).restart()
     simulation.stop()
 
     svg.selectAll('circle')
-        .transition().duration(600).delay((d, i) => i * 2).ease(d3.easeElastic, 0)
+        .transition().duration(600).delay((d, i) => i * 2).ease(d3.easeElastic, 3)
             .attr('r', 10)
             .attr('cx', d => histXScale(d.Midpoint))
             .attr('cy', d => histYScale(d.HistCol))
@@ -495,12 +502,6 @@ let activationFunctions = [
     draw8
 ]
 
-
-function temp(){
-
-}
-
-
 //All the scrolling function
 //Will draw a new graph based on the index provided by the scroll
 
@@ -523,9 +524,6 @@ scroll.on('active', function(index){
         activationFunctions[i]();
     })
     lastIndex = activeIndex;
-    
-    // activationFunctions[index]()
-    // activationFunctions[index]()
 
 })
 
