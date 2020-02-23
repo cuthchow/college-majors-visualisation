@@ -48,6 +48,7 @@ d3.csv('data/recent-grads.csv', function(d){
     console.log(dataset)
     createScales()
     drawInitial()
+    createSizeLegend()
 })
 
 //Create all the scales and save to global variables
@@ -76,6 +77,24 @@ function createLegend(x, y){
     
     d3.select('.categoryLegend')
         .call(categoryLegend)
+}
+
+function createSizeLegend(){
+    let svg = d3.select('#legend2')
+    svg.append('g')
+        .attr('class', 'sizeLegend')
+        .attr('transform', `translate(100,50)`)
+
+    sizeLegend = d3.legendSize()
+        .scale(salarySizeScale)
+        .shape('circle')
+        .shapePadding(15)
+        .title('Salary Scale')
+        .labelFormat(d3.format("$,.2r"))
+        .cells(7)
+
+    d3.select('.sizeLegend')
+        .call(sizeLegend)
 }
 
 //Draws the initial stuff
@@ -188,9 +207,9 @@ function draw1(){
                     .attr('width', 1000)
                     .attr('height', 1000)
     
-    svg.selectAll('text').remove()
-    svg.selectAll('rect').remove()
-    d3.select('.categoryLegend').remove()
+    svg.selectAll('text').transition().remove()
+    svg.selectAll('rect').transition().remove()
+    d3.select('.categoryLegend').transition().remove()
 
     let xAxis = d3.axisBottom(salaryXScale)
                     .ticks(4)
@@ -210,7 +229,7 @@ function draw1(){
     .data(dataset)
     .enter()
     .append('text')
-        .transition('scatterplot').duration(500)
+        .transition('scatterplot').duration(100)
         .text((d, i) => d.Major)
         .attr('x', 150)
         .attr('y', (d, i) => i * 5.5 + 20)
@@ -218,7 +237,7 @@ function draw1(){
         .attr('text-anchor', 'end')
     
     svg.selectAll('circle')
-        .transition('initial-scatter').duration(500).delay(500)
+        .transition('initial-scatter').duration(500).delay(100)
         .attr('fill', 'black')
         .attr('r', 3)
         .attr('cx', (d, i) => salaryXScale(d.Median))
@@ -235,7 +254,7 @@ function draw2(){
     svg.selectAll('rect').remove()
 
     svg.selectAll('circle')
-        .transition('small-multiples-categories').duration(500).delay((d, i) => i * 5)
+        .transition('small-multiples-categories').duration(200).delay((d, i) => i * 2)
         .attr('r', d => salarySizeScale(d.Median))
         .attr('fill', d => categoryColorScale(d.Category))
 
@@ -252,10 +271,15 @@ function draw2(){
 function draw3(){
     let svg = d3.select("#vis").select('svg')
     
+    svg.selectAll('circle')
+        .transition('small-multiples-categories').duration(300).delay((d, i) => i * 2)
+        .attr('r', d => salarySizeScale(d.Median))
+        .attr('fill', d => categoryColorScale(d.Category))
+
     svg.selectAll('rect')
         .data(categories).enter()
         .append('rect')
-            .transition().duration(200).delay((d, i) => i * 50)
+            .transition().delay((d, i) => i * 50)
             .attr('class', 'cat_rect')
             .attr('x', d => categoriesXY[d][0] + 120)
             .attr('y', d => categoriesXY[d][1] +80)
@@ -265,8 +289,9 @@ function draw3(){
             .attr('fill', 'grey')
 
     svg.selectAll('text')
-            .text(d => d)
-            .transition('label-small-multiple').duration(200).delay((d, i) => i * 50)
+            .raise()
+            .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
+            .transition('label-small-multiple').duration(200).delay((d, i) => i * 50 + 50)
             .attr('x', d => categoriesXY[d][0] + 200)
             .attr('y', d => categoriesXY[d][1] + 100)
             .attr('class', 'cat_label')
@@ -274,31 +299,19 @@ function draw3(){
             .attr('font-size', '12px')
             .attr('font-weight', 700)
             .attr('fill', 'black')
-            .attr('text-anchor', 'middle')
-
+            .attr('text-anchor', 'middle')    
+ 
     svg.selectAll('.cat_label')
-        .on('mouseover', d => {
-            d3.select(this).text('yo')
+        .on('mouseover', function(d, i){
             console.log('yo')
+            d3.select(this)
+                .text(d)
         })
+        // .on('mouseout', function(d, i){
+        //     d3.select(this)
+        //         .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
+        // })
 
-    
-    
-    
-}
-
-function draw32(){
-    let svg = d3.select("#vis").select('svg')
-
-    svg.selectAll('.cat_label')
-        .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
-        .transition().duration(200)
-            .attr('fill', 'black')
-    
-    svg.selectAll('circle')
-        .transition('small-multiples-categories').duration(500).delay((d, i) => i * 5)
-        .attr('r', d => salarySizeScale(d.Median))
-        .attr('fill', d => categoryColorScale(d.Category))
 }
 
 function draw4(){
@@ -317,12 +330,21 @@ function draw4(){
     svg.selectAll('rect').transition().duration(100).attr('opacity', 0.2)
 
     svg.selectAll('circle')
-        .transition('small-multiples-gender').duration(500).delay((d, i) => i * 5)
+        .transition('small-multiples-gender').duration(200).delay((d, i) => i * 3)
             .attr('fill', colorByGender)
             .attr('r', d => salarySizeScale(d.Median))
     
     svg.selectAll('.cat_label')
+        .raise()
         .text(d => `% Female: ${categoriesXY[d][3]}%`)
+        .on('mouseover', function(d, i) {
+            d3.select(this)
+                .text(d)
+        })
+        .on('mouseout', function(d, i){
+            d3.select(this)
+                .text(d => `% Female: ${categoriesXY[d][3]}%`)
+        })
 }
 
 function colorByGender(d, i){
@@ -340,14 +362,14 @@ function draw5(){
     
     let svg = d3.select("#vis").select("svg")
     svg.selectAll('g').attr('opacity', 0).transition().remove()
-    svg.selectAll('.cat_label').transition().attr('opacity', 0)
-    svg.selectAll('.cat_rect').transition().duration(100).attr('opacity', 0)
+    svg.selectAll('.cat_label').transition('remove-cat-label').attr('opacity', 0)
+    svg.selectAll('.cat_rect').transition('remove-cat-rect').attr('opacity', 0)
 
     let xAxis = d3.axisBottom(shareWomenXScale)
     let yAxis = d3.axisLeft(salaryYScale)
 
     svg.selectAll('circle')
-        .transition('gender-scatter').duration(1000)
+        .transition('gender-scatter').duration(700)
         .attr('cx', d => shareWomenXScale(d.ShareWomen))
         .attr('cy', d => salaryYScale(d.Median))
         .attr('fill', colorByGender)
@@ -397,6 +419,9 @@ function draw6(){
         .attr('r', d => enrollmentSizeScale(d.Total))
         .attr('fill', d => categoryColorScale(d.Category))
 
+    let xAxis = d3.axisBottom(enrollmentScale)
+    svg.append('g').call(xAxis).transition(500).attr('transform', 'translate(0, 700)')
+
     simulation.alpha(0.7).restart()
     
 
@@ -414,8 +439,7 @@ function draw7(){
 
    
 
-    let xAxis = d3.axisBottom(enrollmentScale)
-    svg.append('g').call(xAxis).transition(500).attr('transform', 'translate(0, 700)')
+   
 
 
 }
@@ -470,6 +494,6 @@ scroll.on('active', function(index){
 
 scroll.on('progress', function(index, progress){
     if (index == 2 & progress > 0.7){
-        draw32();
+
     }
 })
