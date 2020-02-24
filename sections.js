@@ -364,7 +364,7 @@ function draw4(){
     simulation
         .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
         .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
-        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 2))
+        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 4))
 
     simulation.alpha(1).restart()
 
@@ -407,7 +407,7 @@ function draw5(){
     svg.selectAll('.scatter-y').transition().attr('opacity', 0.6).selectAll('.domain').attr('opacity', 1)
 
     svg.selectAll('circle')
-        .transition('gender-scatter').duration(700)
+        .transition().duration(700)
         .attr('cx', d => shareWomenXScale(d.ShareWomen))
         .attr('cy', d => salaryYScale(d.Median))
         .attr('fill', colorByGender)
