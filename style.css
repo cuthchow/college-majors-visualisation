@@ -26,6 +26,9 @@ body {
     font-weight: 400;
     line-height: 1.4rem;
     text-align: justify;
+    /* display: flex;
+    flex-direction: column;
+    justify-content: space-around; */
 }
 
 h1, h2 {

@@ -50,7 +50,6 @@ d3.csv('data/recent-grads.csv', function(d){
     console.log(dataset)
     createScales()
     setTimeout(drawInitial(), 100)
-
 })
 
 const colors = ['#ffcc00', '#ff6666', '#cc0066', '#66cccc', '#f688bb', '#65587f', '#baf1a1', '#333333', '#75b79e',  '#66cccc', '#9de3d0', '#f1935c', '#0c7b93', '#eab0d9', '#baf1a1', '#9399ff']
@@ -136,6 +135,7 @@ function drawInitial(){
                     .append('svg')
                     .attr('width', 1000)
                     .attr('height', 950)
+                    .attr('opacity', 1)
 
     let xAxis = d3.axisBottom(salaryXScale)
                     .ticks(4)
