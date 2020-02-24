@@ -551,7 +551,6 @@ function draw8(){
         
 }
 
-
 //Array of all the graph functions
 //Will be called from the scroller functionality
 
