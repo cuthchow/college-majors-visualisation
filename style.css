@@ -81,3 +81,7 @@ strong {
 svg circle:hover{
     cursor: pointer;
 }
+
+.swatch {
+    fill: #939393;
+}

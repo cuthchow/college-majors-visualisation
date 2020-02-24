@@ -8,7 +8,7 @@ useful of them being [Jim Vallandingham's article](https://vallandingham.me/scro
 The most useful techniques I have learned in this project include:
 
 * Using .transition() before every attribute change to allow interruptable animations
-* Using named transitions for animations which must be completed 
+* Using named transitions for animations which must be completed
 * Using .raise() to reorder elements - Will append current selection to the end of the parent element
 * Creating all elements initially, and using the opacity attribute to bring them in and out of view 
 * Using d3.dispatch to generate events, which dispatches events based on the user's scroll positino

@@ -224,7 +224,7 @@ function drawInitial(){
     svg.selectAll('.lab-text')
         .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
         .attr('x', d => categoriesXY[d][0] + 200 + 1000)
-        .attr('y', d => categoriesXY[d][1] + 50)
+        .attr('y', d => categoriesXY[d][1] - 500)
         .attr('font-family', 'Domine')
         .attr('font-size', '12px')
         .attr('font-weight', 700)
@@ -286,8 +286,33 @@ function drawInitial(){
         .call(histxAxis)
 }
 
+//Cleaning Function
+//Will hide all the elements which are not necessary for a given chart type 
+
+function clean(chartType){
+    let svg = d3.select('#vis').select('svg')
+    if (chartType !== "isScatter") {
+        svg.select('.scatter-x').transition().attr('opacity', 0)
+        svg.select('.scatter-y').transition().attr('opacity', 0)
+        svg.select('.best-fit').transition().duration(200).attr('opacity', 0)
+    }
+    if (chartType !== "isMultiples"){
+        svg.selectAll('.lab-text').transition().attr('opacity', 0)
+        svg.selectAll('.cat-rect').transition().attr('opacity', 0)
+    }
+    if (chartType !== "isFirst"){
+        svg.select('.first-axis').transition().attr('opacity', 0)
+        svg.selectAll('.small-text').transition().attr('opacity', 0)
+    }
+    if (chartType !== "isHist"){
+        svg.selectAll('.hist-axis').transition().attr('opacity', 0)
+    }
+    if (chartType !== "isBubble"){
+        svg.select('.enrolment-axis').transition().attr('opacity', 0)
+    }
+}
+
 //First draw function
-//Need to undo the graph of both the preceding and proceeding functions
 
 function draw1(){
     //Stop simulation
@@ -298,7 +323,7 @@ function draw1(){
                     .attr('width', 1000)
                     .attr('height', 950)
     
-    clean(false, false, true, false, false)
+    clean('isFirst')
 
     d3.select('.categoryLegend').transition().remove()
 
@@ -319,11 +344,11 @@ function draw1(){
 function draw2(){
     let svg = d3.select("#vis").select('svg')
     
-    clean(false, false, false, false, false)
+    clean('none')
 
     svg.selectAll('circle')
-        .transition().duration(200).delay((d, i) => i * 2)
-        .attr('r', d => salarySizeScale(d.Median))
+        .transition().duration(300).delay((d, i) => i * 5)
+        .attr('r', d => salarySizeScale(d.Median) * 1.2)
         .attr('fill', d => categoryColorScale(d.Category))
 
     simulation  
@@ -341,20 +366,21 @@ function draw2(){
 
 function draw3(){
     let svg = d3.select("#vis").select('svg')
-    clean(false, true, false, false, false)
+    clean('isMultiples')
     
     svg.selectAll('circle')
-        .transition().duration(300).delay((d, i) => i * 2)
+        .transition().duration(400).delay((d, i) => i * 5)
         .attr('r', d => salarySizeScale(d.Median))
         .attr('fill', d => categoryColorScale(d.Category))
 
-    svg.selectAll('.cat-rect').transition().duration(300).delay((d, i) => i * 20)
+    svg.selectAll('.cat-rect').transition().duration(400).delay((d, i) => i * 20)
         .attr('opacity', 0.2)
         .attr('x', d => categoriesXY[d][0] + 120)
         
     svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 20)
         .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
         .attr('x', d => categoriesXY[d][0] + 200)   
+        .attr('y', d => categoriesXY[d][1] + 50)
         .attr('opacity', 1) 
 
 }
@@ -369,7 +395,7 @@ function draw4(){
     simulation.alpha(1).restart()
 
     let svg = d3.select('#vis').select('svg')
-    clean(false, true, false, false, false)
+    clean('isMultiples')
    
     svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 20)
         .text(d => `% Female: ${(categoriesXY[d][3])}%`)
@@ -381,7 +407,7 @@ function draw4(){
         .attr('x', d => categoriesXY[d][0] + 120)
 
     svg.selectAll('circle')
-        .transition().duration(200).delay((d, i) => i * 3)
+        .transition().duration(400).delay((d, i) => i * 4)
             .attr('fill', colorByGender)
             .attr('r', d => salarySizeScale(d.Median))
 
@@ -401,7 +427,7 @@ function draw5(){
     simulation.stop()
     
     let svg = d3.select("#vis").select("svg")
-    clean(true, false, false, false, false)
+    clean('isScatter')
 
     svg.selectAll('.scatter-x').transition().attr('opacity', 0.6).selectAll('.domain').attr('opacity', 1)
     svg.selectAll('.scatter-y').transition().attr('opacity', 0.6).selectAll('.domain').attr('opacity', 1)
@@ -420,7 +446,7 @@ function draw5(){
 function draw6(){
     let svg = d3.select('#vis').select('svg')
 
-    clean(false, false, false, false, true)
+    clean('isBubble')
 
     simulation
         .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
@@ -428,7 +454,7 @@ function draw6(){
         .force('collide', d3.forceCollide(d => enrollmentSizeScale(d.Total) + 2))
 
     svg.selectAll('circle')
-        .transition()
+        .transition().duration(300).delay((d, i) => i * 5)
         .attr('r', d => enrollmentSizeScale(d.Total))
         .attr('fill', d => categoryColorScale(d.Category))
 
@@ -442,12 +468,12 @@ function draw6(){
 function draw7(){
     let svg = d3.select('#vis').select('svg')
 
-    clean(false, false, false, true, false)
+    clean('isHist')
 
     simulation.stop()
 
     svg.selectAll('circle')
-        .transition('hist').duration(400).delay((d, i) => i * 2).ease(d3.easeElastic, 3)
+        .transition().duration(400).delay((d, i) => i * 2).ease(d3.easeElastic, 3)
             .attr('r', 10)
             .attr('cx', d => histXScale(d.Midpoint))
             .attr('cy', d => histYScale(d.HistCol))
@@ -461,33 +487,21 @@ function draw7(){
 }
 
 function draw8(){
+    clean('none')
 
-}
-
-function clean(isScatter, isMultiples, isFirst, isHist, isBubble){
     let svg = d3.select('#vis').select('svg')
-    if (!isScatter) {
-        svg.select('.scatter-x').transition().attr('opacity', 0)
-        svg.select('.scatter-y').transition().attr('opacity', 0)
-        svg.select('.best-fit').transition().duration(200).attr('opacity', 0)
-    }
-    if (!isMultiples){
-        svg.selectAll('.lab-text').transition().attr('opacity', 0)
-        svg.selectAll('.cat-rect').transition().attr('opacity', 0)
-    }
-    if (!isFirst){
-        svg.select('.first-axis').transition().attr('opacity', 0)
-        svg.selectAll('.small-text').transition().attr('opacity', 0)
-    }
-    if (!isHist){
-        svg.selectAll('.hist-axis').transition().attr('opacity', 0)
-    }
-    if (!isBubble){
-        svg.select('.enrolment-axis').transition().attr('opacity', 0)
-    }
+    svg.selectAll('circle')
+        .transition()
+        .attr('r', d => salarySizeScale(d.Median))
+        .attr('fill', d => categoryColorScale(d.Category))
+
+    simulation 
+        .force('forceX', d3.forceX(500))
+        .force('forceY', d3.forceY(500))
+        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 4))
+        .alpha([0.6]).restart()
+        
 }
-
-
 
 
 //Array of all the graph functions
