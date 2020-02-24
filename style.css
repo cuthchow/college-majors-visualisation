@@ -85,3 +85,7 @@ svg circle:hover{
 .swatch {
     fill: #939393;
 }
+
+.sizeLegend2 {
+    opacity: 0.7
+}

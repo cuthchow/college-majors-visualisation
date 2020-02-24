@@ -49,7 +49,6 @@ d3.csv('data/recent-grads.csv', function(d){
     dataset = data
     console.log(dataset)
     createScales()
-    createSizeLegend()
     setTimeout(drawInitial(), 100)
 
 })
@@ -92,7 +91,7 @@ function createSizeLegend(){
         .attr('class', 'sizeLegend')
         .attr('transform', `translate(100,50)`)
 
-    sizeLegend = d3.legendSize()
+    sizeLegend2 = d3.legendSize()
         .scale(salarySizeScale)
         .shape('circle')
         .shapePadding(15)
@@ -101,7 +100,27 @@ function createSizeLegend(){
         .cells(7)
 
     d3.select('.sizeLegend')
-        .call(sizeLegend)
+        .call(sizeLegend2)
+}
+
+function createSizeLegend2(){
+    let svg = d3.select('#legend3')
+    svg.append('g')
+        .attr('class', 'sizeLegend2')
+        .attr('transform', `translate(50,100)`)
+
+    sizeLegend2 = d3.legendSize()
+        .scale(enrollmentSizeScale)
+        .shape('circle')
+        .shapePadding(55)
+        .orient('horizontal')
+        .title('Enrolment Scale')
+        .labels(['1000', '200000', '400000'])
+        .labelOffset(30)
+        .cells(3)
+
+    d3.select('.sizeLegend2')
+        .call(sizeLegend2)
 }
 
 // All the initial elements should be create in the drawInitial function
@@ -110,6 +129,9 @@ function createSizeLegend(){
 // Each element should also have an associated class name for easy reference
 
 function drawInitial(){
+    createSizeLegend()
+    createSizeLegend2()
+
     let svg = d3.select("#vis")
                     .append('svg')
                     .attr('width', 1000)
@@ -264,19 +286,26 @@ function drawInitial(){
             .attr('stroke-width', 3)
 
     let scatterxAxis = d3.axisBottom(shareWomenXScale)
-    let scatteryAxis = d3.axisLeft(salaryYScale)
+    let scatteryAxis = d3.axisLeft(salaryYScale).tickSize([width])
 
     svg.append('g')
         .call(scatterxAxis)
         .attr('class', 'scatter-x')
         .attr('opacity', 0)
-        .attr('transform', `translate(0, ${height})`)
+        .attr('transform', `translate(0, ${height + margin.top})`)
+        .call(g => g.select('.domain')
+            .remove())
     
     svg.append('g')
         .call(scatteryAxis)
         .attr('class', 'scatter-y')
         .attr('opacity', 0)
-        .attr('transform', `translate(${margin.left - 20}, 0)`)
+        .attr('transform', `translate(${margin.left - 20 + width}, 0)`)
+        .call(g => g.select('.domain')
+            .remove())
+        .call(g => g.selectAll('.tick line'))
+            .attr('stroke-opacity', 0.2)
+            .attr('stroke-dasharray', 2.5)
 
     // Axes for Histogram 
 
@@ -453,6 +482,8 @@ function draw6(){
         .transition().duration(800).ease(d3.easeBack)
         .attr('cx', d => shareWomenXScale(d.ShareWomen))
         .attr('cy', d => salaryYScale(d.Median))
+    
+    svg.selectAll('circle').transition(1600)
         .attr('fill', colorByGender)
         .attr('r', 10)
 
@@ -470,7 +501,7 @@ function draw7(){
         .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
         .force('forceY', d3.forceY(500))
         .force('collide', d3.forceCollide(d => enrollmentSizeScale(d.Total) + 2))
-        .alpha(0.6).alphaDecay(0.05).restart()
+        .alpha(0.8).alphaDecay(0.05).restart()
 
     svg.selectAll('circle')
         .transition().duration(300).delay((d, i) => i * 4)
