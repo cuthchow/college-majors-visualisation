@@ -394,7 +394,7 @@ function draw2(){
         .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
         .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
         .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 4))
-        .alpha(0.5).alphaDecay([0.03])
+        .alphaDecay([0.02])
 
     //Reheat simulation and restart
     simulation.alpha(0.9).restart()
@@ -578,6 +578,7 @@ let lastIndex, activeIndex = 0
 
 scroll.on('active', function(index){
     d3.selectAll('.step')
+        .transition().duration(700)
         .style('opacity', function (d, i) {return i === index ? 1 : 0.1;});
     
     activeIndex = index
