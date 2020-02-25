@@ -25,7 +25,7 @@ body {
     height: 700px;
     font-family: "Domine";
     font-weight: 400;
-    line-height: 1.4rem;
+    line-height: 1.4em;
     text-align: justify;
     /* display: flex;
     flex-direction: column;
@@ -35,7 +35,7 @@ body {
 h1, h2 {
     font-weight: 700;
     text-align: right;
-    line-height: 2.3rem;
+    line-height: 32px;
 }
 
 h1 {
