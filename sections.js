@@ -419,7 +419,17 @@ function draw3(){
         .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
         .attr('x', d => categoriesXY[d][0] + 200)   
         .attr('y', d => categoriesXY[d][1] + 50)
-        .attr('opacity', 1) 
+        .attr('opacity', 1)
+
+    svg.selectAll('.lab-text')
+        .on('mouseover', function(d, i){
+            d3.select(this)
+                .text(d)
+        })
+        .on('mouseout', function(d, i){
+            d3.select(this)
+                .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
+        })
 
     simulation  
         .force('charge', d3.forceManyBody().strength([2]))
@@ -447,6 +457,16 @@ function draw5(){
         .attr('x', d => categoriesXY[d][0] + 200)   
         .attr('y', d => categoriesXY[d][1] + 50)
         .attr('opacity', 1)
+    
+    svg.selectAll('.lab-text')
+        .on('mouseover', function(d, i){
+            d3.select(this)
+                .text(d)
+        })
+        .on('mouseout', function(d, i){
+            d3.select(this)
+                .text(d => `% Female: ${(categoriesXY[d][3])}%`)
+        })
    
     svg.selectAll('.cat-rect').transition().duration(300).delay((d, i) => i * 30)
         .attr('opacity', 0.2)
@@ -532,6 +552,9 @@ function draw4(){
         .attr('class', 'hist-axis')
         .attr('transform', `translate(0, ${height + margin.top + 10})`)
         .call(xAxis)
+
+    svg.selectAll('.lab-text')
+        .on('mouseout', )
 }
 
 function draw8(){
@@ -578,7 +601,7 @@ let lastIndex, activeIndex = 0
 
 scroll.on('active', function(index){
     d3.selectAll('.step')
-        .transition().duration(700)
+        .transition().duration(500)
         .style('opacity', function (d, i) {return i === index ? 1 : 0.1;});
     
     activeIndex = index
