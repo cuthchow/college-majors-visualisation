@@ -98,3 +98,7 @@ a {
     color: rgb(221, 0, 255);
     text-decoration: none;
 }
+
+img {
+    display: none;
+}
