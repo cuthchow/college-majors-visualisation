@@ -594,7 +594,6 @@ let activationFunctions = [
 
 let scroll = scroller()
     .container(d3.select('#graphic'))
-    
 scroll()
 
 let lastIndex, activeIndex = 0

@@ -93,3 +93,8 @@ svg circle:hover{
 .sizeLegend2 {
     opacity: 0.7
 }
+
+a {
+    color: rgb(221, 0, 255);
+    text-decoration: none;
+}
