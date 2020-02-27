@@ -1,6 +1,6 @@
 # college-majors-visualisation
 
-()[https://github.com/cuthchow/college-majors-visualisation/blob/master/preview.png]
+![preview_image](https://github.com/cuthchow/college-majors-visualisation/blob/master/preview.png)
 
 An interactive, scrollable visualisation of College Majors in the United States, built using D3.js. The Goal
 of this project was to learn how to create a narrative visualisation which changed state based on the 
