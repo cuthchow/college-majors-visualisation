@@ -12,7 +12,7 @@ A full write-up detailing how this project was created can be found at my blog [
 The most useful techniques I learned in this project include:
 
 * Using .transition() before every attribute change to allow interruptable animations
-* Using named transitions for animations which must be completed
+* Using named transitions for the animations which must be completed
 * Using .raise() to reorder elements - Will append current selection to the end of the parent element
 * Creating all elements initially, and using the opacity attribute to bring them in and out of view 
 * Using d3.dispatch() to generate events, which dispatches events based on the user's scroll position
