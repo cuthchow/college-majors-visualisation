@@ -5,11 +5,11 @@
 An interactive, scrollable visualisation of College Majors in the United States, built using D3.js. The Goal
 of this project was to learn how to create a narrative visualisation which changed state based on the 
 user's scroll position on the page. I utilised several resources to learn the necessary techniques, most 
-useful of them being [Jim Vallandingham's article](https://vallandingham.me/scroller.html) on the topic. 
+useful of them being [Jim Vallandingham's article](https://vallandingham.me/scroller.html) on the topic.
 
 A full write-up detailing how this project was created can be found at my blog [here](https://towardsdatascience.com/how-i-created-an-interactive-scrolling-visualisation-with-d3-js-and-how-you-can-too-e116372e2c73)
 
-The most useful techniques I learned in this project include:
+The most useful techniques I learned in this project included:
 
 * Using .transition() before every attribute change to allow interruptable animations
 * Using named transitions for the animations which must be completed
