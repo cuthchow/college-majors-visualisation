@@ -7,7 +7,7 @@ of this project was to learn how to create a narrative visualisation which chang
 user's scroll position on the page. I utilised several resources to learn the necessary techniques, most 
 useful of them being [Jim Vallandingham's article](https://vallandingham.me/scroller.html) on the topic.
 
-A full write-up detailing how this project was created can be found at my blog [here](https://towardsdatascience.com/how-i-created-an-interactive-scrolling-visualisation-with-d3-js-and-how-you-can-too-e116372e2c73)
+A full write-up detailing how this project was created can be found at my [blog here](https://towardsdatascience.com/how-i-created-an-interactive-scrolling-visualisation-with-d3-js-and-how-you-can-too-e116372e2c73)
 
 The most useful techniques I learned in this project included:
 
