@@ -9,7 +9,7 @@ useful of them being [Jim Vallandingham's article](https://vallandingham.me/scro
 
 A full write-up detailing how this project was created can be found at my [blog here](https://towardsdatascience.com/how-i-created-an-interactive-scrolling-visualisation-with-d3-js-and-how-you-can-too-e116372e2c73)
 
-The most useful techniques I learned in this project included:
+The most useful techniques I learned in this project include:
 
 * Using .transition() before every attribute change to allow interruptable animations
 * Using named transitions for the animations which must be completed
