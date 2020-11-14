@@ -3,10 +3,13 @@ let salarySizeScale, salaryXScale, categoryColorScale
 let simulation, nodes
 let categoryLegend, salaryLegend
 
+const gender_categories = ['Male', 'Female']
+const genre_categories = ['ACTION', 'ACTION COMEDY','ADVENTURE','ANIMATION','COMEDY','DRAMA','FAMILY','HISTORICAL','HORROR','HORROR COMEDY','MUSICAL','ROMANTIC COMEDY','SCIFI/FANTASY','THRILLER']
 const categories = ['Engineering', 'Business', 'Physical Sciences', 'Law & Public Policy', 'Computers & Mathematics', 'Agriculture & Natural Resources',
 'Industrial Arts & Consumer Services','Arts', 'Health','Social Science', 'Biology & Life Science','Education','Humanities & Liberal Arts',
 'Psychology & Social Work','Communications & Journalism','Interdisciplinary']
 
+const gender_categoriesXY = {'Female': [0, 700, 41700, 48.3], 'Male': [400, 700, 31750, 74.9]}
 const categoriesXY = {'Engineering': [0, 400, 57382, 23.9],
                         'Business': [0, 600, 43538, 48.3],
                         'Physical Sciences': [0, 800, 41890, 50.9],
@@ -32,18 +35,29 @@ const height = 950 - margin.top - margin.bottom
 //Create the initial visualisation
 
 
-d3.csv('data/recent-grads.csv', function(d){
+d3.csv('data/wiki_movies_final_dist.csv', function(d){
     return {
-        Major: d.Major,
-        Total: +d.Total,
-        Men: +d.Men,
-        Women: +d.Women,
-        Median: +d.Median,
-        Unemployment: +d.Unemployment_rate,
-        Category: d.Major_category,
-        ShareWomen: +d.ShareWomen, 
-        HistCol: +d.Histogram_column,
-        Midpoint: +d.midpoint
+        Year: +d.year,
+        Month: +d.month,
+        Day: +d.day,
+        Title: d.title,
+        Genre: d.genre_final,
+        Gross: +d.gross,
+        Budget: +d.budget,
+        Male: +d.male_dist7,
+        Female: +d.female_dist7,
+        Gender: d.gender_majority,
+        YearCol: +d.year_col
+        // Major: d.Major,
+        // Total: +d.Total,
+        // Men: +d.Men,
+        // Women: +d.Women,
+        // Median: +d.Median,
+        // Unemployment: +d.Unemployment_rate,
+        // Category: d.Major_category,
+        // ShareWomen: +d.ShareWomen, 
+        // HistCol: +d.Histogram_column,
+        // Midpoint: +d.midpoint
     };
 }).then(data => {
     dataset = data
@@ -57,15 +71,23 @@ const colors = ['#ffcc00', '#ff6666', '#cc0066', '#66cccc', '#f688bb', '#65587f'
 //Create all the scales and save to global variables
 
 function createScales(){
-    salarySizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [5, 35])
-    salaryXScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [margin.left, margin.left + width+250])
-    salaryYScale = d3.scaleLinear([20000, 110000], [margin.top + height, margin.top])
-    categoryColorScale = d3.scaleOrdinal(categories, colors)
-    shareWomenXScale = d3.scaleLinear(d3.extent(dataset, d => d.ShareWomen), [margin.left, margin.left + width])
-    enrollmentScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [margin.left + 120, margin.left + width - 50])
-    enrollmentSizeScale = d3.scaleLinear(d3.extent(dataset, d=> d.Total), [10,60])
-    histXScale = d3.scaleLinear(d3.extent(dataset, d => d.Midpoint), [margin.left, margin.left + width])
-    histYScale = d3.scaleLinear(d3.extent(dataset, d => d.HistCol), [margin.top + height, margin.top])
+    //salarySizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Median), [5, 35])
+    grossSizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Gross), [5, 35])
+    grossXScale = d3.scaleLinear(d3.extent(dataset, d => d.Gross), [margin.left, margin.left + width+250])
+    budgetXScale = d3.scaleLinear(d3.extent(dataset, d => d.Budget), [margin.left, margin.left + width+250])
+    grossYScale = d3.scaleLinear(d3.extent(dataset, d => d.Gross), [margin.top + height, margin.top])
+    zbudgetXScale = d3.scaleLinear([0,10000000], [margin.left, margin.left + width+250])
+    zgrossYScale = d3.scaleLinear([0,10000000], [margin.top + height, margin.top])
+    categoryColorScale = d3.scaleOrdinal(gender_categories, colors)
+    genreColorScale = d3.scaleOrdinal(genre_categories, colors)
+    yearSizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Year), [5, 35])
+    yearXScale = d3.scaleLinear([2000,2020], [margin.left, margin.left + width])
+    yearYScale = d3.scaleLinear(d3.extent(dataset, d => d.YearCol), [margin.top + height, margin.top])
+    //shareWomenXScale = d3.scaleLinear(d3.extent(dataset, d => d.ShareWomen), [margin.left, margin.left + width])
+   // enrollmentScale = d3.scaleLinear(d3.extent(dataset, d => d.Total), [margin.left + 120, margin.left + width - 50])
+    //enrollmentSizeScale = d3.scaleLinear(d3.extent(dataset, d=> d.Total), [10,60])
+    //histXScale = d3.scaleLinear(d3.extent(dataset, d => d.Midpoint), [margin.left, margin.left + width])
+   // histYScale = d3.scaleLinear(d3.extent(dataset, d => d.HistCol), [margin.top + height, margin.top])
 }
 
 function createLegend(x, y){
@@ -78,7 +100,7 @@ function createLegend(x, y){
     categoryLegend = d3.legendColor()
                             .shape('path', d3.symbol().type(d3.symbolCircle).size(150)())
                             .shapePadding(10)
-                            .scale(categoryColorScale)
+                            .scale(genreColorScale)
     
     d3.select('.categoryLegend')
         .call(categoryLegend)
@@ -91,10 +113,10 @@ function createSizeLegend(){
         .attr('transform', `translate(100,50)`)
 
     sizeLegend2 = d3.legendSize()
-        .scale(salarySizeScale)
+        .scale(grossSizeScale)
         .shape('circle')
         .shapePadding(15)
-        .title('Salary Scale')
+        .title('Box Office Scale')
         .labelFormat(d3.format("$,.2r"))
         .cells(7)
 
@@ -109,12 +131,12 @@ function createSizeLegend2(){
         .attr('transform', `translate(50,100)`)
 
     sizeLegend2 = d3.legendSize()
-        .scale(enrollmentSizeScale)
+        .scale(grossSizeScale)
         .shape('circle')
         .shapePadding(55)
         .orient('horizontal')
         .title('Enrolment Scale')
-        .labels(['1000', '200000', '400000'])
+        .labels(['1000', '200000', '40000'])
         .labelOffset(30)
         .cells(3)
 
@@ -128,6 +150,7 @@ function createSizeLegend2(){
 // Each element should also have an associated class name for easy reference
 
 function drawInitial(){
+    console.log('drawInitial')
     createSizeLegend()
     createSizeLegend2()
 
@@ -137,7 +160,7 @@ function drawInitial(){
                     .attr('height', 950)
                     .attr('opacity', 1)
 
-    let xAxis = d3.axisBottom(salaryXScale)
+    let xAxis = d3.axisBottom(grossXScale)
                     .ticks(4)
                     .tickSize(height + 80)
 
@@ -151,8 +174,8 @@ function drawInitial(){
             .attr('stroke-opacity', 0.2)
             .attr('stroke-dasharray', 2.5)
 
-    // Instantiates the force simulation
-    // Has no forces. Actual forces are added and removed as required
+    //Instantiates the force simulation
+    //Has no forces. Actual forces are added and removed as required
 
     simulation = d3.forceSimulation(dataset)
 
@@ -172,10 +195,10 @@ function drawInitial(){
         .data(dataset)
         .enter()
         .append('circle')
-            .attr('fill', 'black')
-            .attr('r', 3)
-            .attr('cx', (d, i) => salaryXScale(d.Median) + 5)
-            .attr('cy', (d, i) => i * 5.2 + 30)
+            .attr('fill', d => categoryColorScale(d.Gender))
+            .attr('r', 10)
+            .attr('cx', (d, i) => i * 5.2 * Math.random())
+            .attr('cy', (d, i) => i * 5.2 * Math.random())
             .attr('opacity', 0.8)
         
     // Add mouseover and mouseout events for all circles
@@ -197,11 +220,11 @@ function drawInitial(){
             .style('left', (d3.event.pageX + 10)+ 'px')
             .style('top', (d3.event.pageY - 25) + 'px')
             .style('display', 'inline-block')
-            .html(`<strong>Major:</strong> ${d.Major[0] + d.Major.slice(1,).toLowerCase()} 
-                <br> <strong>Median Salary:</strong> $${d3.format(",.2r")(d.Median)} 
-                <br> <strong>Category:</strong> ${d.Category}
-                <br> <strong>% Female:</strong> ${Math.round(d.ShareWomen*100)}%
-                <br> <strong># Enrolled:</strong> ${d3.format(",.2r")(d.Total)}`)
+            .html(`<strong>Title:</strong> ${d.Title} 
+                <br> <strong>Genre:</strong> ${d.Genre} 
+                <br> <strong>Majority Cast:</strong> ${d.Gender}
+                <br> <strong>Female %:</strong> ${d.Female}%
+                <br> <strong>Male %:</strong> ${d.Male}`)
     }
     
     function mouseOut(d, i){
@@ -215,25 +238,26 @@ function drawInitial(){
     }
 
     //Small text label for first graph
-    svg.selectAll('.small-text')
-        .data(dataset)
-        .enter()
+     svg.selectAll('.small-text')
+         .data(dataset)
+         .enter()
         .append('text')
-            .text((d, i) => d.Major.toLowerCase())
+            .text((d, i) => d.Title)
             .attr('class', 'small-text')
             .attr('x', margin.left)
             .attr('y', (d, i) => i * 5.2 + 30)
             .attr('font-size', 7)
             .attr('text-anchor', 'end')
+            .attr('opacity', 0.0)
     
     //All the required components for the small multiples charts
     //Initialises the text and rectangles, and sets opacity to 0 
     svg.selectAll('.cat-rect')
-        .data(categories).enter()
+        .data(gender_categories).enter()
         .append('rect')
             .attr('class', 'cat-rect')
-            .attr('x', d => categoriesXY[d][0] + 120 + 1000)
-            .attr('y', d => categoriesXY[d][1] + 30)
+            .attr('x', d => gender_categoriesXY[d][0] + 120 + 1000)
+            .attr('y', d => gender_categoriesXY[d][1] + 30)
             .attr('width', 160)
             .attr('height', 30)
             .attr('opacity', 0)
@@ -241,16 +265,16 @@ function drawInitial(){
 
 
     svg.selectAll('.lab-text')
-        .data(categories).enter()
+        .data(gender_categories).enter()
         .append('text')
         .attr('class', 'lab-text')
         .attr('opacity', 0)
         .raise()
 
     svg.selectAll('.lab-text')
-        .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
-        .attr('x', d => categoriesXY[d][0] + 200 + 1000)
-        .attr('y', d => categoriesXY[d][1] - 500)
+        .text(d => `Average: $${d3.format(",.2r")(gender_categoriesXY[d][2])}`)
+        .attr('x', d => gender_categoriesXY[d][0] + 200 + 1000)
+        .attr('y', d => gender_categoriesXY[d][1] - 500)
         .attr('font-family', 'Domine')
         .attr('font-size', '12px')
         .attr('font-weight', 700)
@@ -264,16 +288,16 @@ function drawInitial(){
             })
             .on('mouseout', function(d, i){
                 d3.select(this)
-                    .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
+                    .text(d => `Average: $${d3.format(",.2r")(gender_categoriesXY[d][2])}`)
             })
 
 
     // Best fit line for gender scatter plot
 
-    const bestFitLine = [{x: 0, y: 56093}, {x: 1, y: 25423}]
+    const bestFitLine = [{x: 0, y: 56093}, {x: 1, y: 345423}]
     const lineFunction = d3.line()
-                            .x(d => shareWomenXScale(d.x))
-                            .y(d => salaryYScale(d.y))
+                            .x(d => budgetXScale(d.x))
+                            .y(d => grossYScale(d.y))
 
     // Axes for Scatter Plot
     svg.append('path')
@@ -285,8 +309,11 @@ function drawInitial(){
             .attr('opacity', 0)
             .attr('stroke-width', 3)
 
-    let scatterxAxis = d3.axisBottom(shareWomenXScale)
-    let scatteryAxis = d3.axisLeft(salaryYScale).tickSize([width])
+    let scatterxAxis = d3.axisBottom(grossXScale)
+    let scatteryAxis = d3.axisLeft(grossYScale).tickSize([width])
+
+    let zscatterxAxis = d3.axisBottom(zbudgetXScale)
+    let zscatteryAxis = d3.axisLeft(zgrossYScale).tickSize([width])
 
     svg.append('g')
         .call(scatterxAxis)
@@ -307,15 +334,43 @@ function drawInitial(){
             .attr('stroke-opacity', 0.2)
             .attr('stroke-dasharray', 2.5)
 
+    svg.append('g')
+        .call(zscatterxAxis)
+        .attr('class', 'z-scatter-x')
+        .attr('opacity', 0)
+        .attr('transform', `translate(0, ${height + margin.top})`)
+        .call(g => g.select('.domain')
+            .remove())
+        
+    svg.append('g')
+        .call(zscatteryAxis)
+        .attr('class', 'z-scatter-y')
+        .attr('opacity', 0)
+        .attr('transform', `translate(${margin.left - 20 + width}, 0)`)
+        .call(g => g.select('.domain')
+            .remove())
+        .call(g => g.selectAll('.tick line'))
+            .attr('stroke-opacity', 0.2)
+            .attr('stroke-dasharray', 2.5)
+
     // Axes for Histogram 
 
-    let histxAxis = d3.axisBottom(enrollmentScale)
+    let histxAxis = d3.axisBottom(grossSizeScale)
 
     svg.append('g')
         .attr('class', 'enrolment-axis')
         .attr('transform', 'translate(0, 700)')
         .attr('opacity', 0)
         .call(histxAxis)
+
+    // Axes for Barplot
+    let barxAxis = d3.axisBottom(yearSizeScale)
+
+    svg.append('g')
+        .attr('class', 'enrolment-axis')
+        .attr('transform', 'translate(0, 700)')
+        .attr('opacity', 0)
+        .call(barxAxis)
 }
 
 //Cleaning Function
@@ -323,11 +378,19 @@ function drawInitial(){
 
 function clean(chartType){
     let svg = d3.select('#vis').select('svg')
-    if (chartType !== "isScatter") {
+    if (chartType !== "isScatterFull") {
         svg.select('.scatter-x').transition().attr('opacity', 0)
         svg.select('.scatter-y').transition().attr('opacity', 0)
+        svg.selectAll('.z-scatter-x').transition().attr('opacity', 0)
+        svg.selectAll('.z-scatter-y').transition().attr('opacity', 0)
         svg.select('.best-fit').transition().duration(200).attr('opacity', 0)
     }
+    if (chartType !== "isScatterZoom")
+        svg.selectAll('.scatter-x').transition().attr('opacity', 0)
+        svg.selectAll('.scatter-y').transition().attr('opacity', 0)
+        svg.selectAll('.z-scatter-x').transition().attr('opacity', 0)
+        svg.selectAll('.z-scatter-y').transition().attr('opacity', 0)
+
     if (chartType !== "isMultiples"){
         svg.selectAll('.lab-text').transition().attr('opacity', 0)
             .attr('x', 1800)
@@ -349,7 +412,8 @@ function clean(chartType){
 
 //First draw function
 
-function draw1(){
+function draw(){
+    console.log('draw')
     //Stop simulation
     simulation.stop()
     
@@ -369,8 +433,8 @@ function draw1(){
         .transition().duration(500).delay(100)
         .attr('fill', 'black')
         .attr('r', 3)
-        .attr('cx', (d, i) => salaryXScale(d.Median)+5)
-        .attr('cy', (d, i) => i * 5.2 + 30)
+        .attr('cx', (d, i) => Math.random())
+        .attr('cy', (d, i) => Math.random())
 
     svg.selectAll('.small-text').transition()
         .attr('opacity', 1)
@@ -380,45 +444,57 @@ function draw1(){
 
 
 function draw2(){
+    console.log('draw2')
     let svg = d3.select("#vis").select('svg')
     
     clean('none')
 
     svg.selectAll('circle')
         .transition().duration(300).delay((d, i) => i * 5)
-        .attr('r', d => salarySizeScale(d.Median) * 1.2)
-        .attr('fill', d => categoryColorScale(d.Category))
+        .attr('r', 10)
+        .attr('fill', d => genreColorScale(d.Genre))
 
     simulation  
         .force('charge', d3.forceManyBody().strength([2]))
-        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
-        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
-        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 4))
+        .force('forceX', d3.forceX(d => gender_categoriesXY[d.Gender][0] + 200))
+        .force('forceY', d3.forceY(d => gender_categoriesXY[d.Gender][1] - 200))
+        .force('collide', d3.forceCollide(d => grossSizeScale(d.Gross) + 4))
         .alphaDecay([0.02])
+    svg.selectAll('.cat-rect').transition().duration(300).delay((d, i) => i * 30)
+        .attr('opacity', 0.2)
+        .attr('x', d => gender_categoriesXY[d][0] + 120)
+        
+    svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 30)
+        .text(d => gender_categoriesXY[d][2])
+        .attr('x', d => gender_categoriesXY[d][0] + 200)   
+        .attr('y', d => gender_categoriesXY[d][1] + 50)
+        .attr('opacity', 1)
+
+
 
     //Reheat simulation and restart
     simulation.alpha(0.9).restart()
-    
     createLegend(20, 50)
 }
 
 function draw3(){
+    console.log('draw3')
     let svg = d3.select("#vis").select('svg')
     clean('isMultiples')
     
     svg.selectAll('circle')
         .transition().duration(400).delay((d, i) => i * 5)
-        .attr('r', d => salarySizeScale(d.Median) * 1.2)
-        .attr('fill', d => categoryColorScale(d.Category))
+        .attr('r', d => grossSizeScale(d.Gross) * 1.2)
+        .attr('fill', d => categoryColorScale(d.Gender))
 
     svg.selectAll('.cat-rect').transition().duration(300).delay((d, i) => i * 30)
         .attr('opacity', 0.2)
-        .attr('x', d => categoriesXY[d][0] + 120)
+        .attr('x', d => gender_categoriesXY[d][0] + 120)
         
     svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 30)
-        .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
-        .attr('x', d => categoriesXY[d][0] + 200)   
-        .attr('y', d => categoriesXY[d][1] + 50)
+        .text(d => `Average: $${d3.format(",.2r")(gender_categoriesXY[d][2])}`)
+        .attr('x', d => gender_categoriesXY[d][0] + 200)   
+        .attr('y', d => gender_categoriesXY[d][1] + 50)
         .attr('opacity', 1)
 
     svg.selectAll('.lab-text')
@@ -428,34 +504,35 @@ function draw3(){
         })
         .on('mouseout', function(d, i){
             d3.select(this)
-                .text(d => `Average: $${d3.format(",.2r")(categoriesXY[d][2])}`)
+                .text(d => `Average: $${d3.format(",.2r")(gender_categories[d][2])}`)
         })
 
     simulation  
         .force('charge', d3.forceManyBody().strength([2]))
-        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
-        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
-        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 4))
+        .force('forceX', d3.forceX(d => gender_categoriesXY[d.Gender][0] + 200))
+        .force('forceY', d3.forceY(d => gender_categoriesXY[d.Gender][1] - 50))
+        .force('collide', d3.forceCollide(d => grossSizeScale(d.Gross) + 4))
         .alpha(0.7).alphaDecay(0.02).restart()
 
 }
 
-function draw5(){
+function draw1(){
+    console.log('draw1')
     
     let svg = d3.select('#vis').select('svg')
     clean('isMultiples')
 
     simulation
-        .force('forceX', d3.forceX(d => categoriesXY[d.Category][0] + 200))
-        .force('forceY', d3.forceY(d => categoriesXY[d.Category][1] - 50))
-        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) + 4))
+        .force('forceX', d3.forceX(d => gender_categoriesXY[d.Gender][0] + 200))
+        .force('forceY', d3.forceY(d => gender_categoriesXY[d.Gender][1] - 50))
+        .force('collide', d3.forceCollide(d => grossSizeScale(d.Gross) + 4))
 
     simulation.alpha(1).restart()
    
     svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 30)
-        .text(d => `% Female: ${(categoriesXY[d][3])}%`)
-        .attr('x', d => categoriesXY[d][0] + 200)   
-        .attr('y', d => categoriesXY[d][1] + 50)
+        .text(d => `% Female: ${(gender_categoriesXY[d][3])}%`)
+        .attr('x', d => gender_categoriesXY[d][0] + 200)   
+        .attr('y', d => gender_categoriesXY[d][1] + 50)
         .attr('opacity', 1)
     
     svg.selectAll('.lab-text')
@@ -465,17 +542,17 @@ function draw5(){
         })
         .on('mouseout', function(d, i){
             d3.select(this)
-                .text(d => `% Female: ${(categoriesXY[d][3])}%`)
+                .text(d => `% Female: ${(gender_categoriesXY[d][3])}%`)
         })
    
     svg.selectAll('.cat-rect').transition().duration(300).delay((d, i) => i * 30)
         .attr('opacity', 0.2)
-        .attr('x', d => categoriesXY[d][0] + 120)
+        .attr('x', d => gender_categoriesXY[d][0] + 120)
 
     svg.selectAll('circle')
         .transition().duration(400).delay((d, i) => i * 4)
-            .attr('fill', colorByGender)
-            .attr('r', d => salarySizeScale(d.Median))
+            .attr('fill', d => categoryColorScale(d.Gender))
+            .attr('r', d => grossSizeScale(d.Gender))
 
 }
 
@@ -489,22 +566,23 @@ function colorByGender(d, i){
     }
 }
 
-function draw6(){
+function draw5(){
+    console.log('draw5')
     simulation.stop()
     
     let svg = d3.select("#vis").select("svg")
-    clean('isScatter')
+    clean('isScatterFull')
 
     svg.selectAll('.scatter-x').transition().attr('opacity', 0.7).selectAll('.domain').attr('opacity', 1)
     svg.selectAll('.scatter-y').transition().attr('opacity', 0.7).selectAll('.domain').attr('opacity', 1)
 
     svg.selectAll('circle')
         .transition().duration(800).ease(d3.easeBack)
-        .attr('cx', d => shareWomenXScale(d.ShareWomen))
-        .attr('cy', d => salaryYScale(d.Median))
+        .attr('cx', d => budgetXScale(d.Budget))
+        .attr('cy', d => grossYScale(d.Gross))
     
     svg.selectAll('circle').transition(1600)
-        .attr('fill', colorByGender)
+        .attr('fill', d => categoryColorScale(d.Gender))
         .attr('r', 10)
 
     svg.select('.best-fit').transition().duration(300)
@@ -512,28 +590,48 @@ function draw6(){
    
 }
 
-function draw7(){
+function draw6(){
+    console.log('draw6')
     let svg = d3.select('#vis').select('svg')
 
-    clean('isBubble')
+    //clean('isBubble')
 
-    simulation
-        .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
-        .force('forceY', d3.forceY(500))
-        .force('collide', d3.forceCollide(d => enrollmentSizeScale(d.Total) + 2))
-        .alpha(0.8).alphaDecay(0.05).restart()
+    // simulation
+    //     .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
+    //     .force('forceY', d3.forceY(500))
+    //     .force('collide', d3.forceCollide(d => enrollmentSizeScale(d.Total) + 2))
+    //     .alpha(0.8).alphaDecay(0.05).restart()
+
+    // svg.selectAll('circle')
+    //     .transition().duration(300).delay((d, i) => i * 4)
+    //     .attr('r', d => enrollmentSizeScale(d.Total))
+    //     .attr('fill', d => categoryColorScale(d.Gender))
+
+    // //Show enrolment axis (remember to include domain)
+    // svg.select('.enrolment-axis').attr('opacity', 0.5).selectAll('.domain').attr('opacity', 1)
+
+    clean('isScatterZoom')
+    svg.selectAll('.scatter-x').transition().attr('opacity', 0.0).selectAll('.domain').attr('opacity', 0)
+    svg.selectAll('.scatter-y').transition().attr('opacity', 0.0).selectAll('.domain').attr('opacity', 0)
+    svg.selectAll('.z-scatter-x').transition().attr('opacity', 0.7).selectAll('.domain').attr('opacity', 1)
+    svg.selectAll('.z-scatter-y').transition().attr('opacity', 0.7).selectAll('.domain').attr('opacity', 1)
 
     svg.selectAll('circle')
-        .transition().duration(300).delay((d, i) => i * 4)
-        .attr('r', d => enrollmentSizeScale(d.Total))
-        .attr('fill', d => categoryColorScale(d.Category))
+        .transition().duration(800).ease(d3.easeBack)
+        .attr('cx', d => zbudgetXScale(d.Budget))
+        .attr('cy', d => zgrossYScale(d.Gross))
+    
+    svg.selectAll('circle').transition(1600)
+        .attr('fill', d => categoryColorScale(d.Gender))
+        .attr('r', 10)
 
-    //Show enrolment axis (remember to include domain)
-    svg.select('.enrolment-axis').attr('opacity', 0.5).selectAll('.domain').attr('opacity', 1)
+    svg.select('.best-fit').transition().duration(300)
+        .attr('opacity', 0.5)
 
 }
 
 function draw4(){
+    console.log('draw4')
     let svg = d3.select('#vis').select('svg')
 
     clean('isHist')
@@ -542,12 +640,12 @@ function draw4(){
 
     svg.selectAll('circle')
         .transition().duration(600).delay((d, i) => i * 2).ease(d3.easeBack)
-            .attr('r', 10)
-            .attr('cx', d => histXScale(d.Midpoint))
-            .attr('cy', d => histYScale(d.HistCol))
-            .attr('fill', d => categoryColorScale(d.Category))
+            .attr('cx', d => yearXScale(d.Year))
+            .attr('cy', d => yearYScale(d.YearCol))
+            .attr('fill', d => categoryColorScale(d.Gender))
+            .attr('r', d => grossSizeScale(d.Gross) * 1.2)
 
-    let xAxis = d3.axisBottom(histXScale)
+    let xAxis = d3.axisBottom(yearXScale)
     svg.append('g')
         .attr('class', 'hist-axis')
         .attr('transform', `translate(0, ${height + margin.top + 10})`)
@@ -557,19 +655,19 @@ function draw4(){
         .on('mouseout', )
 }
 
-function draw8(){
+function draw7(){
     clean('none')
 
     let svg = d3.select('#vis').select('svg')
     svg.selectAll('circle')
         .transition()
-        .attr('r', d => salarySizeScale(d.Median) * 1.6)
-        .attr('fill', d => categoryColorScale(d.Category))
+        .attr('r', d => grossSizeScale(d.Gross) * 1.6)
+        .attr('fill', d => categoryColorScale(d.Gender))
 
     simulation 
         .force('forceX', d3.forceX(500))
         .force('forceY', d3.forceY(500))
-        .force('collide', d3.forceCollide(d => salarySizeScale(d.Median) * 1.6 + 4))
+        .force('collide', d3.forceCollide(d => grossSizeScale(d.Gross) * 1.6 + 4))
         .alpha(0.6).alphaDecay(0.05).restart()
         
 }
@@ -584,8 +682,7 @@ let activationFunctions = [
     draw4,
     draw5, 
     draw6, 
-    draw7,
-    draw8
+    draw7
 ]
 
 //All the scrolling function

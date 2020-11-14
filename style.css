@@ -94,6 +94,10 @@ svg circle:hover{
     opacity: 0.7
 }
 
+.genreLegend {
+    opacity: 0.7
+}
+
 a {
     color: rgb(221, 0, 255);
     text-decoration: none;
