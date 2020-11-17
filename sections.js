@@ -4,12 +4,28 @@ let simulation, nodes
 let categoryLegend, salaryLegend
 
 const gender_categories = ['Male', 'Female']
-const genre_categories = ['ACTION', 'ACTION COMEDY','ADVENTURE','ANIMATION','COMEDY','DRAMA','FAMILY','HISTORICAL','HORROR','HORROR COMEDY','MUSICAL','ROMANTIC COMEDY','SCIFI/FANTASY','THRILLER']
+const genre_categories = ['ACTION','ACTION_COMEDY','ADVENTURE','ANIMATION','COMEDY','DRAMA','FAMILY','HISTORICAL','HORROR','HORROR_COMEDY','MUSICAL','ROMANCE','ROMANTIC_COMEDY','SCIFI/FANTASY','THRILLER','DOCUMENTARY']
 const categories = ['Engineering', 'Business', 'Physical Sciences', 'Law & Public Policy', 'Computers & Mathematics', 'Agriculture & Natural Resources',
 'Industrial Arts & Consumer Services','Arts', 'Health','Social Science', 'Biology & Life Science','Education','Humanities & Liberal Arts',
 'Psychology & Social Work','Communications & Journalism','Interdisciplinary']
 
-const gender_categoriesXY = {'Female': [0, 700, 41700, 48.3], 'Male': [400, 700, 31750, 74.9]}
+const gender_categoriesXY = {'Female': [0, 500, 2537348.61, 48.3], 'Male': [500, 500, 3071240.51, 74.9]}
+const genre_categoriesXY = {'ACTION': [0, 400, 'ACTION', 23.9],
+                                'ACTION_COMEDY': [0, 600, 'ACTION COMEDY', 48.3],
+                                'ADVENTURE': [0, 800, 'ADVENTURE', 50.9],
+                                'ANIMATION': [0, 200, 'ANIMATION', 48.3],
+                                'COMEDY': [200, 400, 'COMEDY', 31.2],
+                                'DRAMA': [200, 600, 'DRAMA', 40.5],
+                                'FAMILY': [200, 800, 'FAMILY', 35.0],
+                                'HISTORICAL': [200, 200, 'HISTORICAL', 60.4],
+                                'HORROR': [400, 400, 'HORROR', 79.5],
+                                'HORROR_COMEDY': [400, 600, 'HORROR COMEDY', 55.4],
+                                'MUSICAL': [400, 800, 'MUSICAL', 58.7],
+                                'ROMANCE': [400, 200, 'ROMANCE', 74.9],
+                                'ROMANTIC_COMEDY': [600, 400, 'ROMANTIC COMEDY', 63.2],
+                                'SCIFI/FANTASY': [600, 600, 'SCIFI/FANTASY', 79.4],
+                                'THRILLER':[600, 800, 'THRILLER', 65.9],
+                                'DOCUMENTARY':[600, 200, 'DOCUMENTARY', 77.1]}
 const categoriesXY = {'Engineering': [0, 400, 57382, 23.9],
                         'Business': [0, 600, 43538, 48.3],
                         'Physical Sciences': [0, 800, 41890, 50.9],
@@ -35,15 +51,15 @@ const height = 950 - margin.top - margin.bottom
 //Create the initial visualisation
 
 
-d3.csv('data/wiki_movies_final_dist.csv', function(d){
+d3.csv('data/processed_df_Nov17.csv', function(d){
     return {
         Year: +d.year,
         Month: +d.month,
         Day: +d.day,
         Title: d.title,
         Genre: d.genre_final,
-        Gross: +d.gross,
-        Budget: +d.budget,
+        Gross: +d.gross_adj,
+        Budget: +d.budget_adj,
         Male: +d.male_dist7,
         Female: +d.female_dist7,
         Gender: d.gender_majority,
@@ -76,8 +92,8 @@ function createScales(){
     grossXScale = d3.scaleLinear(d3.extent(dataset, d => d.Gross), [margin.left, margin.left + width+250])
     budgetXScale = d3.scaleLinear(d3.extent(dataset, d => d.Budget), [margin.left, margin.left + width+250])
     grossYScale = d3.scaleLinear(d3.extent(dataset, d => d.Gross), [margin.top + height, margin.top])
-    zbudgetXScale = d3.scaleLinear([0,10000000], [margin.left, margin.left + width+250])
-    zgrossYScale = d3.scaleLinear([0,10000000], [margin.top + height, margin.top])
+    zbudgetXScale = d3.scaleLinear([2000,15000000], [margin.left, margin.left + width+250])
+    zgrossYScale = d3.scaleLinear([2000,15000000], [margin.top + height, margin.top])
     categoryColorScale = d3.scaleOrdinal(gender_categories, colors)
     genreColorScale = d3.scaleOrdinal(genre_categories, colors)
     yearSizeScale = d3.scaleLinear(d3.extent(dataset, d => d.Year), [5, 35])
@@ -160,19 +176,7 @@ function drawInitial(){
                     .attr('height', 950)
                     .attr('opacity', 1)
 
-    let xAxis = d3.axisBottom(grossXScale)
-                    .ticks(4)
-                    .tickSize(height + 80)
 
-    let xAxisGroup = svg.append('g')
-        .attr('class', 'first-axis')
-        .attr('transform', 'translate(0, 0)')
-        .call(xAxis)
-        .call(g => g.select('.domain')
-            .remove())
-        .call(g => g.selectAll('.tick line'))
-            .attr('stroke-opacity', 0.2)
-            .attr('stroke-dasharray', 2.5)
 
     //Instantiates the force simulation
     //Has no forces. Actual forces are added and removed as required
@@ -223,8 +227,11 @@ function drawInitial(){
             .html(`<strong>Title:</strong> ${d.Title} 
                 <br> <strong>Genre:</strong> ${d.Genre} 
                 <br> <strong>Majority Cast:</strong> ${d.Gender}
-                <br> <strong>Female %:</strong> ${d.Female}%
-                <br> <strong>Male %:</strong> ${d.Male}`)
+                <br> <strong>Female %:</strong> ${d.Female}
+                <br> <strong>Male %:</strong> ${d.Male}
+                <br> <strong>Box Office : </strong> ${d.Gross}
+                <br> <strong>Budget: </strong> ${d.Budget}
+                <br> <strong>Year Produced: </strong> ${d.Year}`)
     }
     
     function mouseOut(d, i){
@@ -262,8 +269,43 @@ function drawInitial(){
             .attr('height', 30)
             .attr('opacity', 0)
             .attr('fill', 'grey')
-
-
+    svg.selectAll('.genre-rect')
+        .data(genre_categories).enter()
+        .append('rect')
+            .attr('class', 'genre-rect')
+            .attr('x', d => genre_categoriesXY[d][0] + 120 + 1000)
+            .attr('y', d => genre_categoriesXY[d][1] + 30)
+            .attr('width', 160)
+            .attr('height', 30)
+            .attr('opacity', 0)
+            .attr('fill', 'grey')
+    svg.selectAll('.genre-lab-text')
+            .data(genre_categories).enter()
+            .append('text')
+            .attr('class', 'genre-lab-text')
+            .attr('opacity', 0)
+            .raise()
+    
+    svg.selectAll('.genre-lab-text')
+            .text(d => `Average: $${d3.format(",.2r")(genre_categoriesXY[d][2])}`)
+            .attr('x', d => genre_categoriesXY[d][0] + 200 + 1000)
+            .attr('y', d => genre_categoriesXY[d][1] - 500)
+            .attr('font-family', 'Domine')
+            .attr('font-size', '12px')
+            .attr('font-weight', 700)
+            .attr('fill', 'black')
+            .attr('text-anchor', 'middle')       
+    
+    svg.selectAll('.genre-lab-text')
+                .on('mouseover', function(d, i){
+                    d3.select(this)
+                        .text(d)
+                })
+                .on('mouseout', function(d, i){
+                    d3.select(this)
+                        .text(d => genre_categoriesXY[d][2])
+                })
+    
     svg.selectAll('.lab-text')
         .data(gender_categories).enter()
         .append('text')
@@ -294,17 +336,47 @@ function drawInitial(){
 
     // Best fit line for gender scatter plot
 
-    const bestFitLine = [{x: 0, y: 56093}, {x: 1, y: 345423}]
+    const bestFitLineFemale = [{x: 0, y: 360517}, {x: 42000000, y: 42350647.0}]
+    const bestFitLineMale = [{x: 0, y: 2607780}, {x: 42000000, y: 26206908}]
+    const bestFitLineFemalez = [{x: 0, y: 360517}, {x: 15000000, y: 15356992.0}]
+    const bestFitLineMalez = [{x: 0, y: 2607780}, {x: 15000000, y: 11036040}]
     const lineFunction = d3.line()
                             .x(d => budgetXScale(d.x))
                             .y(d => grossYScale(d.y))
+    const zlineFunction = d3.line()
+                            .x(d => zbudgetXScale(d.x))
+                            .y(d => zgrossYScale(d.y))
 
     // Axes for Scatter Plot
     svg.append('path')
-        .transition('best-fit-line').duration(430)
-            .attr('class', 'best-fit')
-            .attr('d', lineFunction(bestFitLine))
-            .attr('stroke', 'grey')
+        .transition('best-fit-line-female').duration(430)
+            .attr('class', 'best-fit-female')
+            .attr('d', lineFunction(bestFitLineFemale))
+            .attr('stroke', '#CD0000')
+            .attr('stroke-dasharray', 6.2)
+            .attr('opacity', 0)
+            .attr('stroke-width', 3)
+    svg.append('path')
+        .transition('best-fit-line-male').duration(430)
+            .attr('class', 'best-fit-male')
+            .attr('d', lineFunction(bestFitLineMale))
+            .attr('stroke', '#EB7A00')
+            .attr('stroke-dasharray', 6.2)
+            .attr('opacity', 0)
+            .attr('stroke-width', 3)
+    svg.append('path')
+        .transition('z-best-fit-line-female').duration(430)
+            .attr('class', 'z-best-fit-female')
+            .attr('d', zlineFunction(bestFitLineFemalez))
+            .attr('stroke', '#CD0000')
+            .attr('stroke-dasharray', 6.2)
+            .attr('opacity', 0)
+            .attr('stroke-width', 3)
+    svg.append('path')
+        .transition('z-best-fit-line-male').duration(430)
+            .attr('class', 'z-best-fit-male')
+            .attr('d', zlineFunction(bestFitLineMalez))
+            .attr('stroke', '#EB7A00')
             .attr('stroke-dasharray', 6.2)
             .attr('opacity', 0)
             .attr('stroke-width', 3)
@@ -383,18 +455,27 @@ function clean(chartType){
         svg.select('.scatter-y').transition().attr('opacity', 0)
         svg.selectAll('.z-scatter-x').transition().attr('opacity', 0)
         svg.selectAll('.z-scatter-y').transition().attr('opacity', 0)
-        svg.select('.best-fit').transition().duration(200).attr('opacity', 0)
+        svg.select('.best-fit-female').transition().duration(200).attr('opacity', 0)
+        svg.select('.best-fit-male').transition().duration(200).attr('opacity', 0)
     }
     if (chartType !== "isScatterZoom")
         svg.selectAll('.scatter-x').transition().attr('opacity', 0)
         svg.selectAll('.scatter-y').transition().attr('opacity', 0)
         svg.selectAll('.z-scatter-x').transition().attr('opacity', 0)
         svg.selectAll('.z-scatter-y').transition().attr('opacity', 0)
+        svg.select('.z-best-fit-female').transition().duration(200).attr('opacity', 0)
+        svg.select('.z-best-fit-male').transition().duration(200).attr('opacity', 0)
 
     if (chartType !== "isMultiples"){
         svg.selectAll('.lab-text').transition().attr('opacity', 0)
             .attr('x', 1800)
         svg.selectAll('.cat-rect').transition().attr('opacity', 0)
+            .attr('x', 1800)
+    }
+    if (chartType !== "isMultiplesGenre"){
+        svg.selectAll('.genre-lab-text').transition().attr('opacity', 0)
+            .attr('x', 1800)
+        svg.selectAll('.genre-rect').transition().attr('opacity', 0)
             .attr('x', 1800)
     }
     if (chartType !== "isFirst"){
@@ -412,8 +493,8 @@ function clean(chartType){
 
 //First draw function
 
-function draw(){
-    console.log('draw')
+function draw8(){
+    console.log('draw8')
     //Stop simulation
     simulation.stop()
     
@@ -446,29 +527,41 @@ function draw(){
 function draw2(){
     console.log('draw2')
     let svg = d3.select("#vis").select('svg')
-    
-    clean('none')
 
+    clean('isMultiplesGenre')
+    
     svg.selectAll('circle')
-        .transition().duration(300).delay((d, i) => i * 5)
-        .attr('r', 10)
-        .attr('fill', d => genreColorScale(d.Genre))
+        .transition().duration(400).delay((d, i) => i * 5)
+        .attr('r', 5)
+        .attr('fill', d => categoryColorScale(d.Gender))
+
+    svg.selectAll('.genre-rect').transition().duration(300).delay((d, i) => i * 30)
+        .attr('opacity', 0.2)
+        .attr('x', d => genre_categoriesXY[d][0] + 120)
+        
+    svg.selectAll('.genre-lab-text').transition().duration(300).delay((d, i) => i * 30)
+        .text(d => genre_categoriesXY[d][2])
+        .attr('x', d => genre_categoriesXY[d][0] + 200)   
+        .attr('y', d => genre_categoriesXY[d][1] + 50)
+        .attr('opacity', 1)
+
+    svg.selectAll('.genre-lab-text')
+        .on('mouseover', function(d, i){
+            d3.select(this)
+                .text(d)
+        })
+        .on('mouseout', function(d, i){
+            d3.select(this)
+                .text(d => (genre_categories[d]))
+        })
 
     simulation  
         .force('charge', d3.forceManyBody().strength([2]))
-        .force('forceX', d3.forceX(d => gender_categoriesXY[d.Gender][0] + 200))
-        .force('forceY', d3.forceY(d => gender_categoriesXY[d.Gender][1] - 200))
-        .force('collide', d3.forceCollide(d => grossSizeScale(d.Gross) + 4))
-        .alphaDecay([0.02])
-    svg.selectAll('.cat-rect').transition().duration(300).delay((d, i) => i * 30)
-        .attr('opacity', 0.2)
-        .attr('x', d => gender_categoriesXY[d][0] + 120)
-        
-    svg.selectAll('.lab-text').transition().duration(300).delay((d, i) => i * 30)
-        .text(d => gender_categoriesXY[d][2])
-        .attr('x', d => gender_categoriesXY[d][0] + 200)   
-        .attr('y', d => gender_categoriesXY[d][1] + 50)
-        .attr('opacity', 1)
+        .force('forceX', d3.forceX(d => genre_categoriesXY[d.Genre][0] + 200))
+        .force('forceY', d3.forceY(d => genre_categoriesXY[d.Genre][1] - 50))
+        .force('collide', d3.forceCollide(d => 3 + 2))
+        .alpha(0.7).alphaDecay(0.02).restart()
+
 
 
 
@@ -556,16 +649,6 @@ function draw1(){
 
 }
 
-function colorByGender(d, i){
-    if (d.ShareWomen < 0.4){
-        return 'blue'
-    } else if (d.ShareWomen > 0.6) {
-        return 'red'
-    } else {
-        return 'grey'
-    }
-}
-
 function draw5(){
     console.log('draw5')
     simulation.stop()
@@ -585,30 +668,16 @@ function draw5(){
         .attr('fill', d => categoryColorScale(d.Gender))
         .attr('r', 10)
 
-    svg.select('.best-fit').transition().duration(300)
+    svg.select('.best-fit-male').transition().duration(300)
         .attr('opacity', 0.5)
-   
+    svg.select('.best-fit-female').transition().duration(300)
+        .attr('opacity', 0.5)
 }
 
 function draw6(){
     console.log('draw6')
     let svg = d3.select('#vis').select('svg')
 
-    //clean('isBubble')
-
-    // simulation
-    //     .force('forceX', d3.forceX(d => enrollmentScale(d.Total)))
-    //     .force('forceY', d3.forceY(500))
-    //     .force('collide', d3.forceCollide(d => enrollmentSizeScale(d.Total) + 2))
-    //     .alpha(0.8).alphaDecay(0.05).restart()
-
-    // svg.selectAll('circle')
-    //     .transition().duration(300).delay((d, i) => i * 4)
-    //     .attr('r', d => enrollmentSizeScale(d.Total))
-    //     .attr('fill', d => categoryColorScale(d.Gender))
-
-    // //Show enrolment axis (remember to include domain)
-    // svg.select('.enrolment-axis').attr('opacity', 0.5).selectAll('.domain').attr('opacity', 1)
 
     clean('isScatterZoom')
     svg.selectAll('.scatter-x').transition().attr('opacity', 0.0).selectAll('.domain').attr('opacity', 0)
@@ -625,7 +694,9 @@ function draw6(){
         .attr('fill', d => categoryColorScale(d.Gender))
         .attr('r', 10)
 
-    svg.select('.best-fit').transition().duration(300)
+    svg.select('.z-best-fit-female').transition().duration(300)
+        .attr('opacity', 0.5)
+    svg.select('.z-best-fit-male').transition().duration(300)
         .attr('opacity', 0.5)
 
 }
@@ -656,6 +727,7 @@ function draw4(){
 }
 
 function draw7(){
+    console.log('draw7')
     clean('none')
 
     let svg = d3.select('#vis').select('svg')
@@ -682,7 +754,8 @@ let activationFunctions = [
     draw4,
     draw5, 
     draw6, 
-    draw7
+    draw7,
+    draw8
 ]
 
 //All the scrolling function
