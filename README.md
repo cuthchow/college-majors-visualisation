@@ -11,7 +11,6 @@ A full write-up detailing how this project was created can be found at my [blog 
 
 The most useful techniques I learned in this project include:
 
-
 * Using .transition() before every attribute change to allow interruptable animations
 * Using named transitions for the animations which must be completed
 * Using .raise() to reorder elements - Will append current selection to the end of the parent element
