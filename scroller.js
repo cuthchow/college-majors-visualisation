@@ -53,7 +53,7 @@ function scroller(){
     }
 
     scroll.container = function(value) {
-        if (arguments.legth === 0){
+        if (arguments.length === 0){
             return container
         } 
         container = value 
